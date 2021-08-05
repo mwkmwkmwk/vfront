@@ -2,36 +2,39 @@
 //! storage and processing of source location data.  The idea is similar
 //! to clang's SourceManager:
 //!
-//! - There is one SourceManager for the whole design that contains all
+//! - There is one [SourceManager] for the whole design that contains all
 //!   source code involved.
-//! - The source code is made of SourceChunks, which are either files or macro
+//! - The source code is made of [SourceChunk]s, which are either files or macro
 //!   expansions, and are wholesale loaded into memory as a single str.
-//! - All SourceChunks are conceptually concatenated into one big linear array
+//! - All [SourceChunk]s are conceptually concatenated into one big linear array
 //!   of bytes, and every source location can thus be stored as a single
-//!   u32 that is a byte index into this virtual array (called SourceLoc).
+//!   u32 that is a byte index into this virtual array (called [SourceLoc]).
 //!   Note that this array is never actually materialized — we just store the
-//!   virtual start position of every SourceChunk and use binary search when
-//!   looking up a SourceLoc.
-//! - For immediate access to the source, we also have SourceRef, which can be
-//!   considered an unpacked form of SourceLoc.  This can be used to directly
-//!   access the backing storage of a given SourceChunk.
-//! - SourceRange is a range of two SourceLoc that belong to the same chunk,
-//!   SourceRangeRef is an unpacked version, which also can be directly used
+//!   virtual start position of every [SourceChunk] and use binary search when
+//!   looking up a [SourceLoc].
+//! - For immediate access to the source, we also have [SourceRef], which can
+//!   be considered an unpacked form of [SourceLoc].  This can be used to
+//!   directly access the backing storage of a given [SourceChunk].
+//! - [SourceRange] is a range of two [SourceLoc] that belong to the same chunk,
+//!   [SourceRangeRef] is an unpacked version, which also can be directly used
 //!   as as string.
-//! - When it is necessary to print a diagnostic, run get_line_info on
-//!   a location to obtain its decoded source position.  If the decoded
-//!   position is within a macro, use loc_invoked to obtain its definition
+//! - When it is necessary to print a diagnostic, run
+//!   [SourceManager::get_line_info] on a location to obtain its
+//!   decoded source position.  If the decoded position is within a macro, use
+//!   [SourceChunkInfo::MacroExpansion::loc_invoked] to obtain its definition
 //!   place, and keep printing position data from there.  If the decoded
-//!   position is an included file, use loc_included to iterate up the include
-//!   stack.
+//!   position is an included file, use [SourceChunkInfo::File::loc_included]
+//!   to iterate up the include stack.
 //! - When a simple file+line+column triple is needed (for export to something
-//!   that has a fixed idea of a location), get_simple_line_info can be called
-//!   to obtain such.  This will automatically go up the macro invocation
-//!   stack, if any, to obtain an actual file location.
+//!   that has a fixed idea of a location),
+//!   [SourceManager::get_simple_line_info] can be called to obtain such.
+//!   This will automatically go up the macro invocation stack, if any, to
+//!   obtain an actual file location.
 //! - To support Verilog `line directive and similar constructs, line override
-//!   entries can be added to chunks.  Doing this will cause get_line_info
-//!   to return the overriden location data in addition to the true location.
-//!   Note that line override entries must be added in position order.
+//!   entries can be added to chunks.  Doing this will cause
+//!   [SourceManager::get_line_info] to return the overriden location data in
+//!   addition to the true location.  Note that line override entries must be
+//!   added in position order.
 
 use elsa::FrozenVec;
 use once_cell::unsync::OnceCell;
@@ -42,7 +45,7 @@ use std::hash::{Hash, Hasher};
 use std::num::NonZeroU32;
 use std::ops::Deref;
 
-/// A contiguous chunk of source code, belonging to a SourceManager.
+/// A contiguous chunk of source code, belonging to a [SourceManager].
 /// Can be a source file or a macro expansion.
 pub struct SourceChunk<'a> {
     /// Uplink.
@@ -61,7 +64,7 @@ pub struct SourceChunk<'a> {
     raw_line_table: OnceCell<Box<[usize]>>,
 }
 
-/// Information about how a SourceChunk was created.
+/// Information about how a [SourceChunk] was created.
 #[derive(Debug, Clone)]
 pub enum SourceChunkInfo {
     /// A source chunk that was loaded from a file.
@@ -118,15 +121,16 @@ pub struct SourceManager<'a> {
 
 /// A compressed representation of a location in the source code, to be used
 /// in ASTs and other long-term storage places.  Only has meaning in relation
-/// to a given SourceManager, and can be unpacked into a SourceRef when
-/// necessary.  Consists of a single NonZeroU32 (so that Option<SourceLoc>
-/// is as cheap as a plain SourceLoc, when necessary).
+/// to a given [SourceManager], and can be unpacked into a [SourceRef] when
+/// necessary.  Consists of a single [NonZeroU32] (so that [Option<SourceLoc>]
+/// is as cheap as a plain [SourceLoc], when necessary).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceLoc {
     vpos: NonZeroU32,
 }
 
-/// A half-open range of two SourceLoc that must belong to the same SourceChunk.
+/// A half-open range of two [SourceLoc]s that must belong to the same
+/// [SourceChunk].
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceRange {
     pub start: SourceLoc,
@@ -144,7 +148,7 @@ pub struct SourceRef<'a> {
 }
 
 /// An uncompressed representation of a range of locations in the source code,
-/// analogous to SourceRef.  Can be dereferenced to obtain underlying str.
+/// analogous to [SourceRef].  Can be dereferenced to obtain underlying str.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceRangeRef<'a> {
     pub chunk: &'a SourceChunk<'a>,
@@ -366,7 +370,7 @@ impl Debug for SourceChunk<'_> {
 }
 
 impl<'a> SourceManager<'a> {
-    /// Expand a SourceLoc into a SourceRef.
+    /// Expand a [SourceLoc] into a [SourceRef].
     pub fn expand_loc(&'a self, loc: SourceLoc) -> SourceRef<'a> {
         // If we have a valid loc in hand, a chunk must already exist.
         assert!(self.chunks.len() != 0);
@@ -388,7 +392,7 @@ impl<'a> SourceManager<'a> {
         assert!(pos <= chunk.text.len());
         SourceRef { chunk, pos }
     }
-    /// Expand a SourceRange into a SourceRangeRef.
+    /// Expand a [SourceRange] into a [SourceRangeRef].
     pub fn expand_range(&'a self, range: SourceRange) -> SourceRangeRef<'a> {
         let start = self.expand_loc(range.start);
         assert!(range.end.vpos >= start.chunk.start_vpos);
@@ -400,7 +404,7 @@ impl<'a> SourceManager<'a> {
             pos_end,
         }
     }
-    /// Add a new chunk, return a SourceRangeRef covering the whole chunk.
+    /// Add a new chunk, return a [SourceRangeRef] covering the whole chunk.
     pub fn add_chunk(&'a self, text: Box<str>, info: SourceChunkInfo) -> &'a SourceChunk<'a> {
         let start_vpos = if self.chunks.len() == 0 {
             NonZeroU32::new(1).unwrap()
@@ -430,19 +434,19 @@ impl<'a> SourceManager<'a> {
         }))
     }
 
-    /// Creates a new SourceManager.
+    /// Creates a new [SourceManager].
     pub fn new() -> Self {
         SourceManager {
             chunks: FrozenVec::new(),
         }
     }
 
-    /// Decodes a SourceLoc directly to SourceLineInfo.
+    /// Decodes a [SourceLoc] directly to [SourceLineInfo].
     pub fn get_line_info(&'a self, loc: SourceLoc) -> SourceLineInfo<'a> {
         self.expand_loc(loc).get_line_info()
     }
 
-    /// Decodes a SourceLoc into SourceSimpleLineInfo.
+    /// Decodes a [SourceLoc] into [SourceSimpleLineInfo].
     pub fn get_simple_line_info(&'a self, mut loc: SourceLoc) -> SourceSimpleLineInfo<'a> {
         loop {
             let sr = self.expand_loc(loc);
@@ -520,7 +524,7 @@ impl<'a> SourceRef<'a> {
         }
     }
 
-    /// Add a new line override.  Calls the underlying SourceChunk method.
+    /// Add a new line override.  Calls the underlying [SourceChunk] method.
     pub fn add_line_override(
         &self,
         file_name: Box<str>,
@@ -538,14 +542,14 @@ impl<'a> SourceRef<'a> {
 }
 
 impl<'a> SourceRangeRef<'a> {
-    /// Return a SourceRef corresponding to start of this range.
+    /// Return a [SourceRef] corresponding to start of this range.
     pub fn start(&self) -> SourceRef<'a> {
         SourceRef {
             chunk: self.chunk,
             pos: self.pos_start,
         }
     }
-    /// Return a SourceRef corresponding to end of this range.
+    /// Return a [SourceRef] corresponding to end of this range.
     pub fn end(&self) -> SourceRef<'a> {
         SourceRef {
             chunk: self.chunk,
