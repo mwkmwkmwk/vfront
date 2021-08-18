@@ -7,3 +7,5 @@ edition = "2018"
 
 [dependencies]
 vfront_basics = { path = "../vfront_basics" }
+vfront_tokendata_derive = { path = "../vfront_tokendata_derive" }
+phf = { version = "0.10", features = ["macros"] }

@@ -3,4 +3,5 @@
 members = [
 	"vfront_basics",
 	"vfront_verilog_parser",
+	"vfront_tokendata_derive",
 ]
