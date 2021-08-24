@@ -1569,36 +1569,36 @@ pub enum KeywordSet {
 // Some bitmasks that describe which languages the given keywords are actually keywords.
 
 // If a given bit is lit in keyword descriptor, the keyword is supported in that language.
-const L_V95 : u32 = 0x0001;
-const L_V2001 : u32 = 0x0002;
-const L_V2001_NO_CFG : u32 = 0x0004;
-const L_V2005 : u32 = 0x0008;
-const L_SV2005 : u32 = 0x0010;
-const L_SV2009 : u32 = 0x0020;
-const L_SV2012 : u32 = 0x0040;
-const L_VA10 : u32 = 0x0080;
-const L_VAMS20 : u32 = 0x0100;
-const L_VAMS21 : u32 = 0x0200;
-const L_VAMS22 : u32 = 0x0400;
-const L_VAMS23 : u32 = 0x0800;
-const L_VAMS24 : u32 = 0x1000;
-const L_ANY : u32 = 0x1fff;
+const L_V95: u32 = 0x0001;
+const L_V2001: u32 = 0x0002;
+const L_V2001_NO_CFG: u32 = 0x0004;
+const L_V2005: u32 = 0x0008;
+const L_SV2005: u32 = 0x0010;
+const L_SV2009: u32 = 0x0020;
+const L_SV2012: u32 = 0x0040;
+const L_VA10: u32 = 0x0080;
+const L_VAMS20: u32 = 0x0100;
+const L_VAMS21: u32 = 0x0200;
+const L_VAMS22: u32 = 0x0400;
+const L_VAMS23: u32 = 0x0800;
+const L_VAMS24: u32 = 0x1000;
+const L_ANY: u32 = 0x1fff;
 
 // Keyword descriptors, for keywords introduced in given language.
-const K_V95 : u32 = 0x1fff;
-const K_V2001 : u32 = 0x187e;
-const K_V2001_CFG : u32 = 0x187a;
-const K_V2005 : u32 = 0x1878;
-const K_SV2005 : u32 = 0x0070;
-const K_SV2009 : u32 = 0x0060;
-const K_SV2012 : u32 = 0x0040;
-const K_VA10 : u32 = 0x1f80;
-const K_VA10_ONLY : u32 = 0x0080;
-const K_VAMS20 : u32 = 0x1f00;
-const K_VAMS21 : u32 = 0x1e00;
-const K_VAMS22 : u32 = 0x1c00;
-const K_VAMS23 : u32 = 0x1800;
-const K_VAMS24 : u32 = 0x1000;
+const K_V95: u32 = 0x1fff;
+const K_V2001: u32 = 0x187e;
+const K_V2001_CFG: u32 = 0x187a;
+const K_V2005: u32 = 0x1878;
+const K_SV2005: u32 = 0x0070;
+const K_SV2009: u32 = 0x0060;
+const K_SV2012: u32 = 0x0040;
+const K_VA10: u32 = 0x1f80;
+const K_VA10_ONLY: u32 = 0x0080;
+const K_VAMS20: u32 = 0x1f00;
+const K_VAMS21: u32 = 0x1e00;
+const K_VAMS22: u32 = 0x1c00;
+const K_VAMS23: u32 = 0x1800;
+const K_VAMS24: u32 = 0x1000;
 
 fn is_keyword_in(lmask: u32, kwset: KeywordSet) -> bool {
     let l = match kwset {

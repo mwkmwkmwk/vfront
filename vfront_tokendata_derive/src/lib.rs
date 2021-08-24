@@ -1,5 +1,5 @@
-use syn::{parse_macro_input, DeriveInput, Data, Expr, punctuated::Punctuated, Token};
 use quote::quote;
+use syn::{parse_macro_input, punctuated::Punctuated, Data, DeriveInput, Expr, Token};
 
 #[proc_macro_derive(TokenData, attributes(keyword))]
 pub fn derive_token_data(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -11,11 +11,12 @@ pub fn derive_token_data(input: proc_macro::TokenStream) -> proc_macro::TokenStr
             let varname = &var.ident;
             for attr in var.attrs.iter() {
                 if attr.path.is_ident("keyword") {
-                    let exprs : Punctuated<Expr, Token![,]> = attr.parse_args_with(Punctuated::parse_terminated).unwrap();
+                    let exprs: Punctuated<Expr, Token![,]> =
+                        attr.parse_args_with(Punctuated::parse_terminated).unwrap();
                     assert_eq!(exprs.len(), 2);
                     let kw_str = &exprs[0];
                     let kw_lang = &exprs[1];
-                    kw_phf.push(quote!{
+                    kw_phf.push(quote! {
                         #kw_str => (#name::#varname, #kw_lang)
                     });
                     break;
@@ -28,7 +29,8 @@ pub fn derive_token_data(input: proc_macro::TokenStream) -> proc_macro::TokenStr
                     #(#kw_phf,)*
                 };
             }
-        ).into()
+        )
+        .into()
     } else {
         panic!("should be an enum")
     }
