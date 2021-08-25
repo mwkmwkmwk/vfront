@@ -377,7 +377,7 @@ impl<'sm> Lexer<'sm> {
             Some((_, c)) if c.is_whitespace() => loop {
                 // Get more whitespace, return a single whitespace token.
                 match chars.next() {
-                    Some((_, cc)) if cc.is_whitespace() => (),
+                    Some((_, cc)) if cc.is_whitespace() && !matches!(cc, '\r' | '\n') => (),
                     it => break (TokenKind::Whitespace, it),
                 }
             },
