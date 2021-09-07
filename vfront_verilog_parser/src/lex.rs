@@ -36,6 +36,14 @@ impl LexMode {
     }
 }
 
+fn eat_chars(s: &str, skip: usize, mut pred: impl FnMut(char) -> bool) -> usize {
+    s[skip..].find(|x| !pred(x)).map(|x| x + skip).unwrap_or(s.len())
+}
+
+fn char_at(s: &str, pos: usize) -> Option<char> {
+    s[pos..].chars().next()
+}
+
 impl<'sm> Lexer<'sm> {
     /// Creates a new lexer.
     pub fn new(chunk: &'sm SourceChunk<'sm>) -> Self {
@@ -48,307 +56,87 @@ impl<'sm> Lexer<'sm> {
     /// Note that the lexer doesn't recognize keywords — this task is done
     /// by the preprocessor.
     pub fn lex(&mut self, mode: LexMode) -> Token<'sm> {
-        let mut chars = self.cursor.suffix().char_indices();
-        let (kind, end) = match chars.next() {
-            // No more characters.
-            None => (TokenKind::BufferEnd, None),
-
-            // Newlines.
-            Some((_, '\n')) => (TokenKind::Newline, chars.next()),
-            Some((_, '\r')) => match chars.next() {
-                Some((_, '\n')) => (TokenKind::Newline, chars.next()),
-                it => (TokenKind::Newline, it),
-            },
-
-            // Boring stuff.
-            Some((_, '[')) => (TokenKind::LBracket, chars.next()),
-            Some((_, '{')) => (TokenKind::LBrace, chars.next()),
-            Some((_, ')')) => (TokenKind::RParen, chars.next()),
-            Some((_, ']')) => (TokenKind::RBracket, chars.next()),
-            Some((_, '}')) => (TokenKind::RBrace, chars.next()),
-            Some((_, ',')) => (TokenKind::Comma, chars.next()),
-            Some((_, ';')) => (TokenKind::Semicolon, chars.next()),
-
-            Some((_, '(')) => match chars.next() {
-                Some((_, '*')) => match chars.next() {
-                    // (*)
-                    Some((_, ')')) => (TokenKind::ParenStar, chars.next()),
-                    // (*
-                    it => (TokenKind::LParenAttr, it),
-                },
-                // (
-                it => (TokenKind::LParen, it),
-            },
-
-            Some((_, '#')) => match chars.next() {
-                Some((_, '#')) => (TokenKind::HashHash, chars.next()),
-                it @ Some((_, '-')) => match chars.next() {
-                    Some((_, '#')) => (TokenKind::HashMinusHash, chars.next()),
-                    _ => (TokenKind::Hash, it),
-                },
-                it @ Some((_, '=')) => match chars.next() {
-                    Some((_, '#')) => (TokenKind::HashEqHash, chars.next()),
-                    _ => (TokenKind::Hash, it),
-                },
-                it => (TokenKind::Hash, it),
-            },
-
-            Some((_, '.')) => match chars.next() {
-                Some((_, '*')) => (TokenKind::DotStar, chars.next()),
-                it => (TokenKind::Dot, it),
-            },
-
-            Some((_, ':')) => match chars.next() {
-                Some((_, ':')) => (TokenKind::ColonColon, chars.next()),
-                it => (TokenKind::Colon, it),
-            },
-
-            Some((_, '@')) => match chars.next() {
-                Some((_, '*')) => (TokenKind::AtStar, chars.next()),
-                Some((_, '@')) => (TokenKind::AtAt, chars.next()),
-                it => (TokenKind::At, it),
-            },
-
-            Some((_, '!')) => match chars.next() {
-                Some((_, '=')) => match chars.next() {
-                    Some((_, '=')) => (TokenKind::NotEqEq, chars.next()),
-                    Some((_, '?')) => (TokenKind::NotEqQuest, chars.next()),
-                    it => (TokenKind::NotEq, it),
-                },
-                it => (TokenKind::Not, it),
-            },
-
-            Some((_, '=')) => match chars.next() {
-                Some((_, '=')) => match chars.next() {
-                    Some((_, '=')) => (TokenKind::EqEqEq, chars.next()),
-                    Some((_, '?')) => (TokenKind::EqEqQuest, chars.next()),
-                    it => (TokenKind::EqEq, it),
-                },
-                Some((_, '>')) => (TokenKind::EqGt, chars.next()),
-                it => (TokenKind::Eq, it),
-            },
-
-            Some((_, '+')) => match chars.next() {
-                Some((_, ':')) => (TokenKind::PlusColon, chars.next()),
-                Some((_, '=')) => (TokenKind::PlusEq, chars.next()),
-                Some((_, '+')) => (TokenKind::PlusPlus, chars.next()),
-                it => (TokenKind::Plus, it),
-            },
-
-            Some((_, '-')) => match chars.next() {
-                Some((_, ':')) => (TokenKind::MinusColon, chars.next()),
-                Some((_, '=')) => (TokenKind::MinusEq, chars.next()),
-                Some((_, '-')) => (TokenKind::MinusMinus, chars.next()),
-                Some((_, '>')) => match chars.next() {
-                    Some((_, '>')) => (TokenKind::MinusGtGt, chars.next()),
-                    it => (TokenKind::MinusGt, it),
-                },
-                it => (TokenKind::Minus, it),
-            },
-
-            Some((_, '*')) => match chars.next() {
-                Some((_, '=')) => (TokenKind::MulEq, chars.next()),
-                Some((_, '*')) => (TokenKind::MulMul, chars.next()),
-                Some((_, '>')) => (TokenKind::MulGt, chars.next()),
-                Some((_, ')')) => (TokenKind::RParenAttr, chars.next()),
-                it => (TokenKind::Mul, it),
-            },
-
-            Some((_, '/')) => match chars.next() {
-                Some((_, '/')) => loop {
-                    if let it @ (None | Some((_, '\n' | '\r'))) = chars.next() {
-                        break (TokenKind::LineComment, it);
-                    }
-                },
-                Some((_, '*')) => 'block_comment_outer: loop {
-                    match chars.next() {
-                        None => break (TokenKind::BlockCommentUnclosed, None),
-                        Some((_, '*')) => loop {
-                            match chars.next() {
-                                Some((_, '/')) => {
-                                    break 'block_comment_outer (
-                                        TokenKind::BlockComment,
-                                        chars.next(),
-                                    )
-                                }
-                                None => {
-                                    break 'block_comment_outer (
-                                        TokenKind::BlockCommentUnclosed,
-                                        None,
-                                    )
-                                }
-                                Some((_, '*')) => (),
-                                _ => break,
-                            }
-                        },
-                        _ => (),
-                    }
-                },
-                Some((_, '=')) => (TokenKind::DivEq, chars.next()),
-                it => (TokenKind::Div, it),
-            },
-
-            Some((_, '%')) => match chars.next() {
-                Some((_, '=')) => (TokenKind::ModEq, chars.next()),
-                it => (TokenKind::Mod, it),
-            },
-
-            Some((_, '&')) => match chars.next() {
-                Some((_, '&')) => match chars.next() {
-                    Some((_, '&')) => (TokenKind::AndAndAnd, chars.next()),
-                    it => (TokenKind::AndAnd, it),
-                },
-                Some((_, '=')) => (TokenKind::AndEq, chars.next()),
-                it => (TokenKind::And, it),
-            },
-
-            Some((_, '|')) => match chars.next() {
-                Some((_, '|')) => (TokenKind::OrOr, chars.next()),
-                Some((_, '=')) => match chars.next() {
-                    Some((_, '>')) => (TokenKind::OrEqGt, chars.next()),
-                    it => (TokenKind::OrEq, it),
-                },
-                it @ Some((_, '-')) => match chars.next() {
-                    Some((_, '>')) => (TokenKind::OrMinusGt, chars.next()),
-                    _ => (TokenKind::Or, it),
-                },
-                it => (TokenKind::Or, it),
-            },
-
-            Some((_, '^')) => match chars.next() {
-                Some((_, '=')) => (TokenKind::XorEq, chars.next()),
-                Some((_, '~')) => (TokenKind::TildeXor, chars.next()),
-                it => (TokenKind::Xor, it),
-            },
-
-            Some((_, '<')) => {
-                if mode == LexMode::Include {
-                    // We're right after `include — if we see a < now, it's
-                    // a funny-quoted string, not na operator.
-                    loop {
-                        // It appears the grammar of <> strings isn't actually
-                        // defined anywhere.  Ah well.
-                        match chars.next() {
-                            // The good ending.
-                            Some((_, '>')) => break (TokenKind::LtGtString, chars.next()),
-                            // The bad ending.
-                            it @ (Some((_, '\r' | '\n')) | None) => {
-                                break (TokenKind::LtGtStringUnclosed, it)
-                            }
-                            _ => (),
-                        }
-                    }
-                } else {
-                    match chars.next() {
-                        Some((_, '<')) => match chars.next() {
-                            Some((_, '<')) => match chars.next() {
-                                Some((_, '=')) => (TokenKind::LtLtLtEq, chars.next()),
-                                it => (TokenKind::LtLtLt, it),
-                            },
-                            Some((_, '=')) => (TokenKind::LtLtEq, chars.next()),
-                            it => (TokenKind::LtLt, it),
-                        },
-                        it @ Some((_, '-')) => match chars.next() {
-                            Some((_, '>')) => (TokenKind::LtMinusGt, chars.next()),
-                            _ => (TokenKind::Lt, it),
-                        },
-                        Some((_, '=')) => (TokenKind::LtEq, chars.next()),
-                        it => (TokenKind::Lt, it),
-                    }
+        let suffix = self.cursor.suffix();
+        let (mut kind, mut len) = TokenKind::recognize_easy(suffix);
+        if suffix.starts_with("//") {
+            kind = TokenKind::LineComment;
+            len = eat_chars(suffix, 0, |x| x != '\r' && x != '\n');
+        } else if suffix.starts_with("/*") {
+            match suffix[2..].find("*/") {
+                Some(n) => {
+                    kind = TokenKind::BlockComment;
+                    len = n + 4;
+                }
+                None => {
+                    kind = TokenKind::BlockCommentUnclosed;
+                    len = suffix.len();
                 }
             }
-
-            Some((_, '>')) => match chars.next() {
-                Some((_, '>')) => match chars.next() {
-                    Some((_, '>')) => match chars.next() {
-                        Some((_, '=')) => (TokenKind::GtGtGtEq, chars.next()),
-                        it => (TokenKind::GtGtGt, it),
-                    },
-                    Some((_, '=')) => (TokenKind::GtGtEq, chars.next()),
-                    it => (TokenKind::GtGt, it),
-                },
-                Some((_, '=')) => (TokenKind::GtEq, chars.next()),
-                it => (TokenKind::Gt, it),
-            },
-
-            Some((_, '~')) => match chars.next() {
-                Some((_, '|')) => (TokenKind::TildeOr, chars.next()),
-                Some((_, '&')) => (TokenKind::TildeAnd, chars.next()),
-                Some((_, '^')) => (TokenKind::TildeXor, chars.next()),
-                it => (TokenKind::Tilde, it),
-            },
-
-            Some((_, '\\')) => match chars.next() {
-                Some((_, c)) if !c.is_whitespace() => loop {
-                    match chars.next() {
-                        Some((_, c)) if !c.is_whitespace() => (),
-                        it => break (TokenKind::EscapedId, it),
-                    }
-                },
-                it => (TokenKind::Backslash, it),
-            },
-
-            Some((_, '$')) => match chars.next() {
-                Some((_, c)) if is_id_cont(c) => loop {
-                    match chars.next() {
-                        Some((_, c)) if is_id_cont(c) => (),
-                        it => break (TokenKind::SystemId, it),
-                    }
-                },
-                it => (TokenKind::Dollar, it),
-            },
-
-            Some((_, '`')) => match chars.next() {
-                Some((_, '`')) => (TokenKind::MacroJoiner, chars.next()),
-                Some((_, '"')) => (TokenKind::MacroQuote, chars.next()),
-                it @ Some((_, '\\')) => {
-                    let c1 = chars.next();
-                    let c2 = chars.next();
-                    match (c1, c2) {
-                        // `\`"
-                        (Some((_, '`')), Some((_, '"'))) => {
-                            (TokenKind::MacroEscapedQuote, chars.next())
-                        }
-                        _ => (TokenKind::Unknown, it),
-                    }
+        } else if suffix.starts_with("<") && mode == LexMode::Include {
+            // We're right after `include — if we see a < now, it's
+            // a funny-quoted string, not an operator.
+            // It appears the grammar of <> strings isn't actually
+            // defined anywhere.  Ah well.
+            let n = eat_chars(suffix, 0, |c| !matches!(c, '\r' | '\n' | '>'));
+            if suffix[n..].starts_with(">") {
+                // The good ending.
+                kind = TokenKind::LtGtString;
+                len = n + 1;
+            } else {
+                // The bad ending.
+                kind = TokenKind::LtGtStringUnclosed;
+                len = n;
+            }
+        } else if kind == TokenKind::Backslash {
+            // Try for an escaped ID.
+            len = eat_chars(suffix, 1, |c| !c.is_whitespace());
+            if len != 1 {
+                kind = TokenKind::EscapedId;
+            }
+        } else if kind == TokenKind::Dollar {
+            len = eat_chars(suffix, 1, is_id_cont);
+            if len != 1 {
+                kind = TokenKind::SystemId;
+            }
+        } else if suffix.starts_with("`") {
+            let mut chars = suffix.char_indices();
+            // Skip the ` itself.
+            chars.next();
+            if let Some((_, c)) = chars.next() {
+                if is_id_start(c) {
+                    kind = TokenKind::Directive;
+                    len = eat_chars(suffix, 1, is_id_cont);
                 }
-                Some((_, c)) if is_id_start(c) => loop {
-                    match chars.next() {
-                        Some((_, c)) if is_id_cont(c) => (),
-                        it => break (TokenKind::Directive, it),
-                    }
-                },
-                // Stray `
-                it => (TokenKind::Unknown, it),
-            },
-
-            Some((_, '\'')) => match chars.next() {
-                Some((_, '0' | '1' | 'x' | 'X' | 'z' | 'Z')) => {
-                    (TokenKind::UnbasedUnsizedNumber, chars.next())
-                }
-                it @ Some((_, 's' | 'S')) => match chars.next() {
-                    Some((_, 'b' | 'B')) => (TokenKind::BaseBin, chars.next()),
-                    Some((_, 'o' | 'O')) => (TokenKind::BaseOct, chars.next()),
-                    Some((_, 'd' | 'D')) => (TokenKind::BaseDec, chars.next()),
-                    Some((_, 'h' | 'H')) => (TokenKind::BaseHex, chars.next()),
-                    _ => (TokenKind::SingleQuote, it),
-                },
-                Some((_, 'b' | 'B')) => (TokenKind::BaseBin, chars.next()),
-                Some((_, 'o' | 'O')) => (TokenKind::BaseOct, chars.next()),
-                Some((_, 'd' | 'D')) => (TokenKind::BaseDec, chars.next()),
-                Some((_, 'h' | 'H')) => (TokenKind::BaseHex, chars.next()),
-                Some((_, '{')) => (TokenKind::LBraceLit, chars.next()),
-                it => (TokenKind::SingleQuote, it),
-            },
-
-            Some((_, '"')) => loop {
+            }
+        } else if suffix.starts_with("\"") {
+            // String parsing.
+            let mut chars = suffix.char_indices();
+            chars.next();
+            loop {
                 match chars.next() {
                     // The good ending.
-                    Some((_, '"')) => break (TokenKind::String, chars.next()),
-                    // The bad ending.
-                    it @ (Some((_, '\r' | '\n')) | None) => break (TokenKind::StringUnclosed, it),
+                    Some((n, '"')) => {
+                        len = n + 1;
+                        kind = TokenKind::String;
+                        break;
+                    }
+                    // The bad endings.
+                    Some((n, '\r' | '\n')) => {
+                        len = n;
+                        kind = TokenKind::StringUnclosed;
+                        break;
+                    }
+                    None => {
+                        len = suffix.len();
+                        kind = TokenKind::StringUnclosed;
+                        break;
+                    }
                     Some((_, '\\')) => match chars.next() {
-                        None => break (TokenKind::StringUnclosed, None),
+                        None => {
+                            len = suffix.len();
+                            kind = TokenKind::StringUnclosed;
+                            break;
+                        }
                         // As long as we have a character, skip it.
                         // Newlines need special treatment, since \ CR LF
                         // should skip both the CR and LF.
@@ -362,123 +150,79 @@ impl<'sm> Lexer<'sm> {
                     },
                     _ => (),
                 }
-            },
-
-            Some((_, '?')) if !mode.is_based() => (TokenKind::Quest, chars.next()),
-
-            Some((
-                _,
-                '0' | '1' | 'x' | 'X' | 'b' | 'B' | 'r' | 'R' | 'f' | 'F' | 'p' | 'P' | 'n' | 'N',
-            )) if mode == LexMode::Table => (TokenKind::TableItem, chars.next()),
-
-            // Here starts stuff that requires a function call on the char.
-
-            // Whitespace.
-            Some((_, c)) if c.is_whitespace() => loop {
-                // Get more whitespace, return a single whitespace token.
-                match chars.next() {
-                    Some((_, cc)) if cc.is_whitespace() && !matches!(cc, '\r' | '\n') => (),
-                    it => break (TokenKind::Whitespace, it),
-                }
-            },
-
-            Some((_, c)) if is_based_digit(c, mode) => loop {
-                match chars.next() {
-                    Some((_, c)) if is_based_digit(c, mode) || c == '_' => (),
-                    it => {
-                        break (
-                            match mode {
-                                LexMode::BaseBin => TokenKind::DigitsBin,
-                                LexMode::BaseOct => TokenKind::DigitsOct,
-                                LexMode::BaseDec => TokenKind::DigitsDec,
-                                LexMode::BaseHex => TokenKind::DigitsHex,
-                                _ => unreachable!(),
-                            },
-                            it,
-                        )
-                    }
-                }
-            },
-
+            }
+        } else if mode == LexMode::Table && suffix.starts_with(&[
+            '0', '1', 'x', 'X', 'b', 'B', 'r', 'R', 'f', 'F', 'p', 'P', 'n', 'N',
+        ][..]) {
+            kind = TokenKind::TableItem;
+            len = 1;
+        } else if suffix.starts_with(|c: char| c.is_whitespace() && !matches!(c, '\r' | '\n')) {
+            kind = TokenKind::Whitespace;
+            len = eat_chars(suffix, 0, |c| c.is_whitespace() && !matches!(c, '\r' | '\n'));
+        } else if mode.is_based() && suffix.starts_with(|c: char| is_based_digit(c, mode)) {
+            kind = match mode {
+                LexMode::BaseBin => TokenKind::DigitsBin,
+                LexMode::BaseOct => TokenKind::DigitsOct,
+                LexMode::BaseDec => TokenKind::DigitsDec,
+                LexMode::BaseHex => TokenKind::DigitsHex,
+                _ => unreachable!(),
+            };
+            len = eat_chars(suffix, 0, |c| is_based_digit(c, mode) || c == '_');
+        } else if mode == LexMode::BaseDec && suffix.starts_with(is_xz) {
             // Special case: for decimal base, x/z must be the only digit
             // if present, though it may be followed by arbitrary number
             // of _.
-            Some((_, c)) if mode == LexMode::BaseDec && is_xz(c) => loop {
-                match chars.next() {
-                    Some((_, '_')) => (),
-                    it => break (TokenKind::DigitsDec, it),
+            kind = TokenKind::DigitsDec;
+            len = eat_chars(suffix, 1, |c| c == '_');
+        } else if suffix.starts_with(is_id_start) {
+            kind = TokenKind::SimpleId;
+            len = eat_chars(suffix, 0, is_id_cont);
+        } else if suffix.starts_with(|c: char| c.is_ascii_digit()) && kind != TokenKind::OneStep {
+            kind = TokenKind::DecimalNumber;
+            len = eat_chars(suffix, 0, |c| c.is_ascii_digit() || c == '_');
+            if char_at(suffix, len) == Some('.') {
+                if char_at(suffix, len + 1).filter(|c| c.is_ascii_digit()).is_some() {
+                    len = eat_chars(suffix, len + 1, |c| c.is_ascii_digit() || c == '_');
+                    kind = TokenKind::RealNumber;
                 }
-            },
-
-            // Simple id (or keyword, to be recognized later).
-            Some((_, c)) if is_id_start(c) => loop {
-                match chars.next() {
-                    Some((_, c)) if is_id_cont(c) => (),
-                    it => break (TokenKind::SimpleId, it),
-                }
-            },
-
-            Some((_, '1')) if self.cursor.suffix().starts_with("1step") => {
-                // This is, apparently, a very weird keyword.
-                chars.next();
-                chars.next();
-                chars.next();
-                chars.next();
-                (TokenKind::OneStep, chars.next())
             }
-
-            // Numbers.
-            Some((_, c)) if c.is_ascii_digit() => {
-                let mut got_dot = false;
-                let mut got_exp = false;
-                let mut kind = TokenKind::DecimalNumber;
-                loop {
-                    match chars.next() {
-                        Some((_, '_')) => (),
-                        it @ Some((_, '.')) if !got_dot && !got_exp => {
-                            match chars.next() {
-                                Some((_, c)) if c.is_ascii_digit() => (),
-                                _ => break (kind, it),
-                            }
-                            got_dot = true;
-                            kind = TokenKind::RealNumber;
-                        }
-                        it @ Some((_, 'e' | 'E')) if !got_exp => {
-                            match chars.next() {
-                                Some((_, '+' | '-')) => match chars.next() {
-                                    Some((_, c)) if c.is_ascii_digit() => (),
-                                    _ => break (kind, it),
-                                },
-                                Some((_, c)) if c.is_ascii_digit() => (),
-                                _ => break (kind, it),
-                            }
-                            got_exp = true;
-                            kind = TokenKind::RealNumber;
-                        }
-                        // 's' suffix — time literal.
-                        Some((_, 's')) if !got_exp => break (TokenKind::Time, chars.next()),
-                        // Either a Verilog-AMS scale factor, or a time unit if followed by s.
-                        Some((_, 'm' | 'u' | 'n' | 'p' | 'f')) if !got_exp => match chars.next() {
-                            Some((_, 's')) => break (TokenKind::Time, chars.next()),
-                            it => break (TokenKind::RealNumber, it),
-                        },
-                        // Always a Verilog-AMS scale factor.
-                        Some((_, 'T' | 'G' | 'M' | 'K' | 'k' | 'a')) if !got_exp => {
-                            break (TokenKind::RealNumber, chars.next())
-                        }
-                        Some((_, c)) if c.is_ascii_digit() => (),
-                        it => break (kind, it),
+            match char_at(suffix, len) {
+                Some('e' | 'E') => {
+                    let mut start_fract = len + 1;
+                    if matches!(char_at(suffix, start_fract), Some('+' | '-')) {
+                        start_fract = len + 2;
+                    }
+                    if char_at(suffix, start_fract).filter(|c| c.is_ascii_digit()).is_some() {
+                        len = eat_chars(suffix, start_fract, |c| c.is_ascii_digit() || c == '_');
+                        kind = TokenKind::RealNumber;
                     }
                 }
+                Some('s') => {
+                    kind = TokenKind::Time;
+                    len += 1;
+                }
+                // Either a Verilog-AMS scale factor, or a time unit if followed by s.
+                Some('m' | 'u' | 'n' | 'p' | 'f') => {
+                    match char_at(suffix, len + 1) {
+                        Some('s') => {
+                            kind = TokenKind::Time;
+                            len += 2;
+                        }
+                        _ => {
+                            kind = TokenKind::RealNumber;
+                            len += 1;
+                        }
+                    }
+                },
+                // Always a Verilog-AMS scale factor.
+                Some('T' | 'G' | 'M' | 'K' | 'k' | 'a') => {
+                    kind = TokenKind::RealNumber;
+                    len += 1;
+                }
+                _ => (),
             }
-
-            Some(_) => (TokenKind::Unknown, chars.next()),
-        };
-        let n = match end {
-            None => self.cursor.suffix().len(),
-            Some((n, _)) => n,
-        };
-        let src = self.cursor.range_len(n);
+        }
+        let src = self.cursor.range_len(len);
         self.cursor = src.end();
         Token { kind, src }
     }

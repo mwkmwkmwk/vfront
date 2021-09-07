@@ -12,3 +12,4 @@ proc-macro = true
 proc-macro2 = "1.0.28"
 syn = { version = "1.0.74", features = ["extra-traits"]}
 quote = "1.0.9"
+itertools = "0.8.0"

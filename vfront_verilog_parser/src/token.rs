@@ -33,6 +33,7 @@ pub enum TokenKind {
     /// Any amount of whitespace that is not a newline
     Whitespace,
     /// \r, \n, or \r\n
+    #[token("\r", "\n", "\r\n")]
     Newline,
     /// /* */
     BlockComment,
@@ -40,13 +41,11 @@ pub enum TokenKind {
     BlockCommentUnclosed,
     /// //
     LineComment,
-    /// End of a source chunk.
-    BufferEnd,
 
     // Specials
     /// An unrecognized character (non-printable, non-ASCII, or loose backtick)
     Unknown,
-    /// End of all input
+    /// End of input
     End,
 
     // Ids and id-like things
@@ -66,15 +65,15 @@ pub enum TokenKind {
     RealNumber,
     /// Decimal number, possibly with decimal point, with time unit suffix
     Time,
-    /// 1step pseudo-keyword
+    #[token("1step")]
     OneStep,
-    /// Binary base specifier token ('b, 'sb, etc)
+    #[token("'b", "'B", "'sb", "'sB", "'Sb", "'SB")]
     BaseBin,
-    /// Octal base specifier token ('o, 'so, etc)
+    #[token("'o", "'O", "'so", "'sO", "'So", "'SO")]
     BaseOct,
-    /// Hex base specifier token ('h, 'sh, etc)
+    #[token("'h", "'H", "'sh", "'sH", "'Sh", "'SH")]
     BaseHex,
-    /// Decimal base specifier token ('d, 'sd, etc)
+    #[token("'d", "'D", "'sd", "'sD", "'Sd", "'SD")]
     BaseDec,
     /// A sequence of binary digits (only recognized for [LexMode::BaseBin])
     DigitsBin,
@@ -84,7 +83,7 @@ pub enum TokenKind {
     DigitsDec,
     /// A sequence of hexadecimal digits (only recognized for [LexMode::BaseHex])
     DigitsHex,
-    /// '0, 'z, etc
+    #[token("'0", "'1", "'x", "'X", "'z", "'Z")]
     UnbasedUnsizedNumber,
     /// A string literal
     String,
@@ -99,180 +98,180 @@ pub enum TokenKind {
     TableItem,
 
     // Macro specials
-    /// `` (only valid within macros)
+    #[token("``")]
     MacroJoiner,
-    /// `" (only valid within macros)
+    #[token("`\"")]
     MacroQuote,
-    /// `\`" (only valid within macros)
+    #[token("`\\`\"")]
     MacroEscapedQuote,
-    /// \ immediately followed by whitespace (used as newline escape in macros)
+    #[token("\\")]
     Backslash,
 
     // Various kind of bracket-involving punctation (ie. tokens where we need to track matching
     // open/close variants)
-    /// (
+    #[token("(")]
     LParen,
-    /// )
+    #[token(")")]
     RParen,
-    /// (*
+    #[token("(*")]
     LParenAttr,
-    /// *)
+    #[token("*)")]
     RParenAttr,
-    /// [
+    #[token("[")]
     LBracket,
-    /// ]
+    #[token("]")]
     RBracket,
-    /// {
+    #[token("{")]
     LBrace,
-    /// '{
+    #[token("'{")]
     LBraceLit,
-    /// }
+    #[token("}")]
     RBrace,
+    #[token("(*)")]
+    ParenStar,
 
     // Non-bracket punctation
-    /// $
+    #[token("$")]
     Dollar,
-    /// ,
+    #[token(",")]
     Comma,
-    /// ;
+    #[token(";")]
     Semicolon,
-    /// ?
+    #[token("?")]
     Quest,
-    /// ~
+    #[token("~")]
     Tilde,
-    /// ~|
+    #[token("~|")]
     TildeOr,
-    /// ~&
+    #[token("~&")]
     TildeAnd,
-    /// ~^ ^~
+    #[token("~^", "^~")]
     TildeXor,
-    /// !
+    #[token("!")]
     Not,
-    /// !=
+    #[token("!=")]
     NotEq,
-    /// !==
+    #[token("!==")]
     NotEqEq,
-    /// !=?
+    #[token("!=?")]
     NotEqQuest,
-    /// =
+    #[token("=")]
     Eq,
-    /// ==
+    #[token("==")]
     EqEq,
-    /// ===
+    #[token("===")]
     EqEqEq,
-    /// ==?
+    #[token("==?")]
     EqEqQuest,
-    /// =>
+    #[token("=>")]
     EqGt,
-    /// +
+    #[token("+")]
     Plus,
-    /// +=
+    #[token("+=")]
     PlusEq,
-    /// +:
+    #[token("+:")]
     PlusColon,
-    /// ++
+    #[token("++")]
     PlusPlus,
-    /// -
+    #[token("-")]
     Minus,
-    /// -=
+    #[token("-=")]
     MinusEq,
-    /// -:
+    #[token("-:")]
     MinusColon,
-    /// --
+    #[token("--")]
     MinusMinus,
-    /// ->
+    #[token("->")]
     MinusGt,
-    /// ->>
+    #[token("->>")]
     MinusGtGt,
-    /// *
+    #[token("*")]
     Mul,
-    /// **
+    #[token("**")]
     MulMul,
-    /// *=
+    #[token("*=")]
     MulEq,
-    /// *>
+    #[token("*>")]
     MulGt,
-    /// /
+    #[token("/")]
     Div,
-    /// /=
+    #[token("/=")]
     DivEq,
-    /// %
+    #[token("%")]
     Mod,
-    /// %=
+    #[token("%=")]
     ModEq,
-    /// &
+    #[token("&")]
     And,
-    /// &&
+    #[token("&&")]
     AndAnd,
-    /// &&&
+    #[token("&&&")]
     AndAndAnd,
-    /// &=
+    #[token("&=")]
     AndEq,
-    /// |
+    #[token("|")]
     Or,
-    /// ||
+    #[token("||")]
     OrOr,
-    /// |=
+    #[token("|=")]
     OrEq,
-    /// |->
+    #[token("|->")]
     OrMinusGt,
-    /// |=>
+    #[token("|=>")]
     OrEqGt,
-    /// ^
+    #[token("^")]
     Xor,
-    /// ^=
+    #[token("^=")]
     XorEq,
-    /// <
+    #[token("<")]
     Lt,
-    /// <<
+    #[token("<<")]
     LtLt,
-    /// <<<
+    #[token("<<<")]
     LtLtLt,
-    /// <=
+    #[token("<=")]
     LtEq,
-    /// <<=
+    #[token("<<=")]
     LtLtEq,
-    /// <<<=
+    #[token("<<<=")]
     LtLtLtEq,
-    /// <->
+    #[token("<->")]
     LtMinusGt,
-    /// >
+    #[token(">")]
     Gt,
-    /// >>
+    #[token(">>")]
     GtGt,
-    /// >>>
+    #[token(">>>")]
     GtGtGt,
-    /// >=
+    #[token(">=")]
     GtEq,
-    /// >>=
+    #[token(">>=")]
     GtGtEq,
-    /// >>>=
+    #[token(">>>=")]
     GtGtGtEq,
-    /// (*)
-    ParenStar,
-    /// '
+    #[token("'")]
     SingleQuote,
-    /// #
+    #[token("#")]
     Hash,
-    /// ##
+    #[token("##")]
     HashHash,
-    /// #-#
+    #[token("#-#")]
     HashMinusHash,
-    /// #=#
+    #[token("#=#")]
     HashEqHash,
-    /// .
+    #[token(".")]
     Dot,
-    /// .*
+    #[token(".*")]
     DotStar,
-    /// :
+    #[token(":")]
     Colon,
-    /// ::
+    #[token("::")]
     ColonColon,
-    /// @
+    #[token("@")]
     At,
-    /// @@
+    #[token("@@")]
     AtAt,
-    /// @*
+    #[token("@*")]
     AtStar,
 
     // Items with end tokens.

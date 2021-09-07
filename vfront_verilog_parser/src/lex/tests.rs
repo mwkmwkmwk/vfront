@@ -29,7 +29,7 @@ fn quicklex_test(text: &str, expected: &[(TokenKind, &str)]) {
         }
     }
     let token = lexer.lex(mode);
-    assert_eq!((token.kind, &*token.src), (TokenKind::BufferEnd, ""));
+    assert_eq!((token.kind, &*token.src), (TokenKind::End, ""));
 }
 
 fn quicklex_test_mode(text: &str, mode: LexMode, expected: &[(TokenKind, &str)]) {
@@ -47,7 +47,7 @@ fn quicklex_test_mode(text: &str, mode: LexMode, expected: &[(TokenKind, &str)])
         assert_eq!((token.kind, &*token.src), (kind, tt));
     }
     let token = lexer.lex(mode);
-    assert_eq!((token.kind, &*token.src), (TokenKind::BufferEnd, ""));
+    assert_eq!((token.kind, &*token.src), (TokenKind::End, ""));
 }
 
 #[test]
