@@ -64,8 +64,8 @@ impl<'sm> Lexer<'sm> {
         if suffix.starts_with("//") {
             kind = TokenKind::LineComment;
             len = eat_chars(suffix, 0, |x| x != '\r' && x != '\n');
-        } else if suffix.starts_with("/*") {
-            match suffix[2..].find("*/") {
+        } else if let Some(csuffix) = suffix.strip_prefix("/*") {
+            match csuffix.find("*/") {
                 Some(n) => {
                     kind = TokenKind::BlockComment;
                     len = n + 4;
@@ -75,13 +75,13 @@ impl<'sm> Lexer<'sm> {
                     len = suffix.len();
                 }
             }
-        } else if suffix.starts_with("<") && mode == LexMode::Include {
+        } else if suffix.starts_with('<') && mode == LexMode::Include {
             // We're right after `include — if we see a < now, it's
             // a funny-quoted string, not an operator.
             // It appears the grammar of <> strings isn't actually
             // defined anywhere.  Ah well.
             let n = eat_chars(suffix, 0, |c| !matches!(c, '\r' | '\n' | '>'));
-            if suffix[n..].starts_with(">") {
+            if suffix[n..].starts_with('>') {
                 // The good ending.
                 kind = TokenKind::LtGtString;
                 len = n + 1;
@@ -101,7 +101,7 @@ impl<'sm> Lexer<'sm> {
             if len != 1 {
                 kind = TokenKind::SystemId;
             }
-        } else if suffix.starts_with("`") {
+        } else if suffix.starts_with('`') {
             let mut chars = suffix.char_indices();
             // Skip the ` itself.
             chars.next();
@@ -111,7 +111,7 @@ impl<'sm> Lexer<'sm> {
                     len = eat_chars(suffix, 1, is_id_cont);
                 }
             }
-        } else if suffix.starts_with("\"") {
+        } else if suffix.starts_with('"') {
             // String parsing.
             let mut chars = suffix.char_indices();
             chars.next();
@@ -189,14 +189,13 @@ impl<'sm> Lexer<'sm> {
         } else if suffix.starts_with(|c: char| c.is_ascii_digit()) && kind != TokenKind::OneStep {
             kind = TokenKind::DecimalNumber;
             len = eat_chars(suffix, 0, |c| c.is_ascii_digit() || c == '_');
-            if char_at(suffix, len) == Some('.') {
-                if char_at(suffix, len + 1)
+            if char_at(suffix, len) == Some('.')
+                && char_at(suffix, len + 1)
                     .filter(|c| c.is_ascii_digit())
                     .is_some()
-                {
-                    len = eat_chars(suffix, len + 1, |c| c.is_ascii_digit() || c == '_');
-                    kind = TokenKind::RealNumber;
-                }
+            {
+                len = eat_chars(suffix, len + 1, |c| c.is_ascii_digit() || c == '_');
+                kind = TokenKind::RealNumber;
             }
             match char_at(suffix, len) {
                 Some('e' | 'E') => {
