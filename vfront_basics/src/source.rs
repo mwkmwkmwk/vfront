@@ -47,9 +47,7 @@ use std::ops::Deref;
 
 /// A contiguous chunk of source code, belonging to a [SourceManager].
 /// Can be a source file or a macro expansion.
-pub struct SourceChunk<'a> {
-    /// Uplink.
-    pub manager: &'a SourceManager<'a>,
+pub struct SourceChunk {
     /// The meat of this chunk.
     pub text: Box<str>,
     /// Information on where it came from.
@@ -114,9 +112,9 @@ pub enum SourceLineOverrideKind {
 /// A catalogue of all source files that were involved in the creation of
 /// an AST / a design / whatever.  New files can be inserted into this given
 /// only a shared reference.
-pub struct SourceManager<'a> {
+pub struct SourceManager {
     /// All chunks, in increasing start_vpos order.
-    chunks: FrozenVec<Box<SourceChunk<'a>>>,
+    chunks: FrozenVec<Box<SourceChunk>>,
 }
 
 /// A compressed representation of a location in the source code, to be used
@@ -143,7 +141,7 @@ pub struct SourceRange {
 /// the text.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceRef<'a> {
-    pub chunk: &'a SourceChunk<'a>,
+    pub chunk: &'a SourceChunk,
     pub pos: usize,
 }
 
@@ -151,7 +149,7 @@ pub struct SourceRef<'a> {
 /// analogous to [SourceRef].  Can be dereferenced to obtain underlying str.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceRangeRef<'a> {
-    pub chunk: &'a SourceChunk<'a>,
+    pub chunk: &'a SourceChunk,
     pub pos_start: usize,
     pub pos_end: usize,
 }
@@ -169,7 +167,7 @@ pub struct SourceSimpleLineInfo<'a> {
 /// Result of looking up a line number.
 #[derive(Clone)]
 pub struct SourceLineInfo<'a> {
-    pub chunk: &'a SourceChunk<'a>,
+    pub chunk: &'a SourceChunk,
     /// Raw line number, 1-based.
     pub line_num: usize,
     /// The line text.
@@ -191,7 +189,7 @@ pub struct SourceOverrideLineInfo<'a> {
     pub line_num: usize,
 }
 
-impl<'a> SourceChunk<'a> {
+impl SourceChunk {
     /// Add a new line override.  The pos given must be strictly larger than
     /// the pos of all previously added line overrides.
     pub fn add_line_override(
@@ -279,7 +277,7 @@ impl<'a> SourceChunk<'a> {
     }
 
     /// Decodes the raw position into line number and related information.
-    pub fn get_line_info(&'a self, pos: usize) -> SourceLineInfo {
+    pub fn get_line_info(&self, pos: usize) -> SourceLineInfo {
         assert!(pos <= self.text.len());
         let raw_line_table = self.get_raw_line_table();
         let find_line_num = |p| raw_line_table.partition_point(|x| *x <= p);
@@ -342,22 +340,21 @@ impl<'a> SourceChunk<'a> {
     }
 }
 
-impl PartialEq for SourceChunk<'_> {
+impl PartialEq for SourceChunk {
     fn eq(&self, other: &Self) -> bool {
-        // start_vpos is unique within one SM.
-        self.start_vpos == other.start_vpos && self.manager == other.manager
+        std::ptr::eq(self, other)
     }
 }
 
-impl Eq for SourceChunk<'_> {}
+impl Eq for SourceChunk {}
 
-impl Hash for SourceChunk<'_> {
+impl Hash for SourceChunk {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.start_vpos.hash(state);
     }
 }
 
-impl Debug for SourceChunk<'_> {
+impl Debug for SourceChunk {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let mut d = f.debug_struct("SourceChunk");
         d.field("start_vpos", &self.start_vpos);
@@ -369,9 +366,9 @@ impl Debug for SourceChunk<'_> {
     }
 }
 
-impl<'a> SourceManager<'a> {
+impl SourceManager {
     /// Expand a [SourceLoc] into a [SourceRef].
-    pub fn expand_loc(&'a self, loc: SourceLoc) -> SourceRef<'a> {
+    pub fn expand_loc(&self, loc: SourceLoc) -> SourceRef {
         // If we have a valid loc in hand, a chunk must already exist.
         assert!(self.chunks.len() != 0);
         let mut size = self.chunks.len() - 1;
@@ -393,7 +390,7 @@ impl<'a> SourceManager<'a> {
         SourceRef { chunk, pos }
     }
     /// Expand a [SourceRange] into a [SourceRangeRef].
-    pub fn expand_range(&'a self, range: SourceRange) -> SourceRangeRef<'a> {
+    pub fn expand_range(&self, range: SourceRange) -> SourceRangeRef {
         let start = self.expand_loc(range.start);
         assert!(range.end.vpos >= start.chunk.start_vpos);
         let pos_end = (range.end.vpos.get() - start.chunk.start_vpos.get()) as usize;
@@ -405,7 +402,7 @@ impl<'a> SourceManager<'a> {
         }
     }
     /// Add a new chunk, return a [SourceRangeRef] covering the whole chunk.
-    pub fn add_chunk(&'a self, text: Box<str>, info: SourceChunkInfo) -> &'a SourceChunk<'a> {
+    pub fn add_chunk(&self, text: Box<str>, info: SourceChunkInfo) -> &SourceChunk {
         let start_vpos = if self.chunks.len() == 0 {
             NonZeroU32::new(1).unwrap()
         } else {
@@ -425,7 +422,6 @@ impl<'a> SourceManager<'a> {
             NonZeroU32::new(raw_start).unwrap()
         };
         self.chunks.push_get(Box::new(SourceChunk {
-            manager: self,
             text,
             info,
             start_vpos,
@@ -442,12 +438,12 @@ impl<'a> SourceManager<'a> {
     }
 
     /// Decodes a [SourceLoc] directly to [SourceLineInfo].
-    pub fn get_line_info(&'a self, loc: SourceLoc) -> SourceLineInfo<'a> {
+    pub fn get_line_info(&self, loc: SourceLoc) -> SourceLineInfo {
         self.expand_loc(loc).get_line_info()
     }
 
     /// Decodes a [SourceLoc] into [SourceSimpleLineInfo].
-    pub fn get_simple_line_info(&'a self, mut loc: SourceLoc) -> SourceSimpleLineInfo<'a> {
+    pub fn get_simple_line_info(&self, mut loc: SourceLoc) -> SourceSimpleLineInfo {
         loop {
             let sr = self.expand_loc(loc);
             match sr.chunk.info {
@@ -476,16 +472,7 @@ impl<'a> SourceManager<'a> {
     }
 }
 
-impl PartialEq for SourceManager<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        // SourceManagers can only be equal to themselves.
-        std::ptr::eq(self, other)
-    }
-}
-
-impl Eq for SourceManager<'_> {}
-
-impl Default for SourceManager<'_> {
+impl Default for SourceManager {
     fn default() -> Self {
         SourceManager::new()
     }

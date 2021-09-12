@@ -46,7 +46,7 @@ fn char_at(s: &str, pos: usize) -> Option<char> {
 
 impl<'sm> Lexer<'sm> {
     /// Creates a new lexer.
-    pub fn new(chunk: &'sm SourceChunk<'sm>) -> Self {
+    pub fn new(chunk: &'sm SourceChunk) -> Self {
         Lexer {
             cursor: SourceRef { chunk, pos: 0 },
         }
