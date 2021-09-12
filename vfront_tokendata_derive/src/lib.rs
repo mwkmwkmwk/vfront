@@ -1,6 +1,8 @@
-use quote::quote;
-use syn::{parse_macro_input, punctuated::Punctuated, Data, DeriveInput, Expr, Token, LitStr, LitByteStr};
 use itertools::Itertools;
+use quote::quote;
+use syn::{
+    parse_macro_input, punctuated::Punctuated, Data, DeriveInput, Expr, LitByteStr, LitStr, Token,
+};
 
 #[proc_macro_derive(TokenData, attributes(keyword, token))]
 pub fn derive_token_data(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -43,7 +45,7 @@ pub fn derive_token_data(input: proc_macro::TokenStream) -> proc_macro::TokenStr
                     #bytes => return (Self::#varname, #key)
                 ));
             }
-            token_matches.push(quote!{
+            token_matches.push(quote! {
                 if s.len() >= #key {
                     match &s.as_bytes()[..#key] {
                         #(#group_matches,)*

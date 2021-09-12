@@ -37,7 +37,10 @@ impl LexMode {
 }
 
 fn eat_chars(s: &str, skip: usize, mut pred: impl FnMut(char) -> bool) -> usize {
-    s[skip..].find(|x| !pred(x)).map(|x| x + skip).unwrap_or(s.len())
+    s[skip..]
+        .find(|x| !pred(x))
+        .map(|x| x + skip)
+        .unwrap_or(s.len())
 }
 
 fn char_at(s: &str, pos: usize) -> Option<char> {
@@ -151,14 +154,20 @@ impl<'sm> Lexer<'sm> {
                     _ => (),
                 }
             }
-        } else if mode == LexMode::Table && suffix.starts_with(&[
-            '0', '1', 'x', 'X', 'b', 'B', 'r', 'R', 'f', 'F', 'p', 'P', 'n', 'N',
-        ][..]) {
+        } else if mode == LexMode::Table
+            && suffix.starts_with(
+                &[
+                    '0', '1', 'x', 'X', 'b', 'B', 'r', 'R', 'f', 'F', 'p', 'P', 'n', 'N',
+                ][..],
+            )
+        {
             kind = TokenKind::TableItem;
             len = 1;
         } else if suffix.starts_with(|c: char| c.is_whitespace() && !matches!(c, '\r' | '\n')) {
             kind = TokenKind::Whitespace;
-            len = eat_chars(suffix, 0, |c| c.is_whitespace() && !matches!(c, '\r' | '\n'));
+            len = eat_chars(suffix, 0, |c| {
+                c.is_whitespace() && !matches!(c, '\r' | '\n')
+            });
         } else if mode.is_based() && suffix.starts_with(|c: char| is_based_digit(c, mode)) {
             kind = match mode {
                 LexMode::BaseBin => TokenKind::DigitsBin,
@@ -181,7 +190,10 @@ impl<'sm> Lexer<'sm> {
             kind = TokenKind::DecimalNumber;
             len = eat_chars(suffix, 0, |c| c.is_ascii_digit() || c == '_');
             if char_at(suffix, len) == Some('.') {
-                if char_at(suffix, len + 1).filter(|c| c.is_ascii_digit()).is_some() {
+                if char_at(suffix, len + 1)
+                    .filter(|c| c.is_ascii_digit())
+                    .is_some()
+                {
                     len = eat_chars(suffix, len + 1, |c| c.is_ascii_digit() || c == '_');
                     kind = TokenKind::RealNumber;
                 }
@@ -192,7 +204,10 @@ impl<'sm> Lexer<'sm> {
                     if matches!(char_at(suffix, start_fract), Some('+' | '-')) {
                         start_fract = len + 2;
                     }
-                    if char_at(suffix, start_fract).filter(|c| c.is_ascii_digit()).is_some() {
+                    if char_at(suffix, start_fract)
+                        .filter(|c| c.is_ascii_digit())
+                        .is_some()
+                    {
                         len = eat_chars(suffix, start_fract, |c| c.is_ascii_digit() || c == '_');
                         kind = TokenKind::RealNumber;
                     }
@@ -202,16 +217,14 @@ impl<'sm> Lexer<'sm> {
                     len += 1;
                 }
                 // Either a Verilog-AMS scale factor, or a time unit if followed by s.
-                Some('m' | 'u' | 'n' | 'p' | 'f') => {
-                    match char_at(suffix, len + 1) {
-                        Some('s') => {
-                            kind = TokenKind::Time;
-                            len += 2;
-                        }
-                        _ => {
-                            kind = TokenKind::RealNumber;
-                            len += 1;
-                        }
+                Some('m' | 'u' | 'n' | 'p' | 'f') => match char_at(suffix, len + 1) {
+                    Some('s') => {
+                        kind = TokenKind::Time;
+                        len += 2;
+                    }
+                    _ => {
+                        kind = TokenKind::RealNumber;
+                        len += 1;
                     }
                 },
                 // Always a Verilog-AMS scale factor.

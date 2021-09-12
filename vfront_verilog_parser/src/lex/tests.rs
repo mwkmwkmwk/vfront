@@ -827,18 +827,8 @@ fn test_table() {
 
 #[test]
 fn test_whitespace() {
-    quicklex_test(
-        "   ",
-        &[
-            (TokenKind::Whitespace, "   "),
-        ],
-    );
-    quicklex_test(
-        "  \t \t ",
-        &[
-            (TokenKind::Whitespace, "  \t \t "),
-        ],
-    );
+    quicklex_test("   ", &[(TokenKind::Whitespace, "   ")]);
+    quicklex_test("  \t \t ", &[(TokenKind::Whitespace, "  \t \t ")]);
     quicklex_test(
         "  \t \t \r\n   \r \n  \t",
         &[
