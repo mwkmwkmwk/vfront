@@ -71,7 +71,7 @@ pub enum SourceChunkInfo {
         file_name: Box<str>,
         /// Location of the `include that pulled this file into the source
         /// stream, or None for top-level files.
-        loc_included: Option<SourceLoc>,
+        loc_included: Option<SourceRange>,
     },
     /// A source chunk resulting from macro expansion.
     MacroExpansion {
@@ -79,9 +79,9 @@ pub enum SourceChunkInfo {
         name: Box<str>,
         /// Location of the `define that created this macro, or None if
         /// this was a predefined macro that was created bypassing the parser.
-        loc_defined: Option<SourceLoc>,
+        loc_defined: Option<SourceRange>,
         /// Location of the macro invocation that created this expansion.
-        loc_invoked: SourceLoc,
+        loc_invoked: SourceRange,
     },
 }
 
@@ -465,7 +465,7 @@ impl SourceManager {
                 }
                 SourceChunkInfo::MacroExpansion { loc_invoked, .. } => {
                     // Retry with invocation loc.
-                    loc = loc_invoked;
+                    loc = loc_invoked.start;
                 }
             }
         }

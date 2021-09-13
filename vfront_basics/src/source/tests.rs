@@ -74,7 +74,11 @@ fn test_line_info() {
         SourceChunkInfo::MacroExpansion {
             name: Box::from("ghi"),
             loc_defined: None,
-            loc_invoked: SourceLoc::from(SourceRef { chunk, pos: 8 }),
+            loc_invoked: SourceRange::from(SourceRangeRef {
+                chunk,
+                pos_start: 8,
+                pos_end: 11,
+            }),
         },
     );
     for (i, s, e) in [(1, 0, 4), (2, 4, 8)] {
