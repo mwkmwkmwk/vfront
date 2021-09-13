@@ -195,7 +195,7 @@ impl SourceChunk {
     pub fn add_line_override(
         &self,
         pos: usize,
-        file_name: Box<str>,
+        file_name: impl Into<Box<str>>,
         line_num: usize,
         kind: SourceLineOverrideKind,
     ) {
@@ -231,7 +231,7 @@ impl SourceChunk {
         self.line_overrides.push(Box::new(SourceLineOverride {
             pos,
             line_num,
-            file_name,
+            file_name: file_name.into(),
             enter_idx,
         }));
     }
@@ -401,8 +401,9 @@ impl SourceManager {
             pos_end,
         }
     }
-    /// Add a new chunk, return a [SourceRangeRef] covering the whole chunk.
-    pub fn add_chunk(&self, text: Box<str>, info: SourceChunkInfo) -> &SourceChunk {
+    /// Add a new chunk, return a [SourceChunk] reference.
+    fn add_chunk(&self, text: impl Into<Box<str>>, info: SourceChunkInfo) -> &SourceChunk {
+        let text = text.into();
         let start_vpos = if self.chunks.len() == 0 {
             NonZeroU32::new(1).unwrap()
         } else {
@@ -428,6 +429,51 @@ impl SourceManager {
             line_overrides: FrozenVec::new(),
             raw_line_table: OnceCell::new(),
         }))
+    }
+
+    /// Add a new chunk representing a top-level file, return it.
+    pub fn add_file(&self, name: impl Into<Box<str>>, text: impl Into<Box<str>>) -> &SourceChunk {
+        self.add_chunk(
+            text,
+            SourceChunkInfo::File {
+                file_name: name.into(),
+                loc_included: None,
+            },
+        )
+    }
+
+    /// Add a new chunk representing an included file, return it.
+    pub fn add_included_file(
+        &self,
+        name: impl Into<Box<str>>,
+        loc_included: impl Into<SourceRange>,
+        text: impl Into<Box<str>>,
+    ) -> &SourceChunk {
+        self.add_chunk(
+            text,
+            SourceChunkInfo::File {
+                file_name: name.into(),
+                loc_included: Some(loc_included.into()),
+            },
+        )
+    }
+
+    /// Add a new chunk representing a macro expansion, return it.
+    pub fn add_macro_expansion(
+        &self,
+        name: impl Into<Box<str>>,
+        loc_defined: Option<SourceRange>,
+        loc_invoked: impl Into<SourceRange>,
+        text: impl Into<Box<str>>,
+    ) -> &SourceChunk {
+        self.add_chunk(
+            text,
+            SourceChunkInfo::MacroExpansion {
+                loc_defined,
+                loc_invoked: loc_invoked.into(),
+                name: name.into(),
+            },
+        )
     }
 
     /// Creates a new [SourceManager].
@@ -514,7 +560,7 @@ impl<'a> SourceRef<'a> {
     /// Add a new line override.  Calls the underlying [SourceChunk] method.
     pub fn add_line_override(
         &self,
-        file_name: Box<str>,
+        file_name: impl Into<Box<str>>,
         line_num: usize,
         kind: SourceLineOverrideKind,
     ) {

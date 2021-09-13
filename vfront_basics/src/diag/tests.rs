@@ -1,5 +1,5 @@
 use super::*;
-use crate::source::{SourceChunkInfo, SourceManager, SourceRangeRef};
+use crate::source::{SourceManager, SourceRangeRef};
 
 mod comp1 {
     diag_types!(comp1,
@@ -161,13 +161,7 @@ fn test_system() {
 #[test]
 fn test_builder() {
     let sm = SourceManager::new();
-    let chunk = sm.add_chunk(
-        "abcdefghijkl\n".into(),
-        SourceChunkInfo::File {
-            file_name: "abc".into(),
-            loc_included: None,
-        },
-    );
+    let chunk = sm.add_file("abc", "abcdefghijkl\n");
     let mut registry = DiagRegistry::new();
     test_comp::register_diags(&mut registry);
     let sink = DiagStore::new();

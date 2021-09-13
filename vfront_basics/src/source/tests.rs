@@ -1,18 +1,11 @@
 use super::*;
 
-fn dummy_info() -> SourceChunkInfo {
-    SourceChunkInfo::File {
-        file_name: Box::from("meh.txt"),
-        loc_included: None,
-    }
-}
-
 #[test]
 fn test_ref_loc() {
     let sm = SourceManager::new();
     let mut chunks = Vec::new();
     for text in ["abc\n", "def\nghi\n", "mlah\n", "", "", "abcdef"] {
-        let chunk = sm.add_chunk(Box::from(text), dummy_info());
+        let chunk = sm.add_file("meh.txt", text);
         assert_eq!(&chunk.text[..], text);
         chunks.push(chunk);
     }
@@ -45,7 +38,7 @@ fn test_ref_loc() {
 fn test_line_info() {
     let text = "abc\ndef\rghi\r\njkl\n\nmno";
     let sm = SourceManager::new();
-    let chunk = sm.add_chunk(Box::from(text), dummy_info());
+    let chunk = sm.add_file("meh.txt", text);
     for (i, s, e) in [
         (1, 0, 4),
         (2, 4, 8),
@@ -69,17 +62,15 @@ fn test_line_info() {
         }
     }
     let mtext = "bla\nghi\n";
-    let mchunk = sm.add_chunk(
-        Box::from(mtext),
-        SourceChunkInfo::MacroExpansion {
-            name: Box::from("ghi"),
-            loc_defined: None,
-            loc_invoked: SourceRange::from(SourceRangeRef {
-                chunk,
-                pos_start: 8,
-                pos_end: 11,
-            }),
+    let mchunk = sm.add_macro_expansion(
+        "ghi",
+        None,
+        SourceRangeRef {
+            chunk,
+            pos_start: 8,
+            pos_end: 11,
         },
+        mtext,
     );
     for (i, s, e) in [(1, 0, 4), (2, 4, 8)] {
         for p in s..e {
@@ -110,14 +101,14 @@ fn test_line_override() {
         text.push_str("meh\n");
     }
     let sm = SourceManager::new();
-    let chunk = sm.add_chunk(Box::from(&*text), dummy_info());
-    chunk.add_line_override(8, Box::from("ov1"), 1, Plain);
-    chunk.add_line_override(20, Box::from("ov2"), 1, IncludeEnter);
-    chunk.add_line_override(24, Box::from("ov2"), 13, Plain);
-    chunk.add_line_override(28, Box::from("ov3"), 2, IncludeEnter);
-    chunk.add_line_override(36, Box::from("ov2"), 15, IncludeExit);
-    chunk.add_line_override(40, Box::from("ov1"), 5, IncludeExit);
-    chunk.add_line_override(60, Box::from("ov4"), 200, Plain);
+    let chunk = sm.add_file("meh.txt", text);
+    chunk.add_line_override(8, "ov1", 1, Plain);
+    chunk.add_line_override(20, "ov2", 1, IncludeEnter);
+    chunk.add_line_override(24, "ov2", 13, Plain);
+    chunk.add_line_override(28, "ov3", 2, IncludeEnter);
+    chunk.add_line_override(36, "ov2", 15, IncludeExit);
+    chunk.add_line_override(40, "ov1", 5, IncludeExit);
+    chunk.add_line_override(60, "ov4", 200, Plain);
     for (l, n, ovs) in [
         (0, 2, &[][..]),
         (2, 3, &[("ov1", 1)]),

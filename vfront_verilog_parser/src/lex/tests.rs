@@ -1,16 +1,10 @@
 use super::*;
 use crate::token::TokenKind;
-use vfront_basics::source::{SourceChunkInfo, SourceManager};
+use vfront_basics::source::SourceManager;
 
 fn quicklex_test(text: &str, expected: &[(TokenKind, &str)]) {
     let sm = SourceManager::new();
-    let chunk = sm.add_chunk(
-        Box::from(text),
-        SourceChunkInfo::File {
-            file_name: Box::from("meh.v"),
-            loc_included: None,
-        },
-    );
+    let chunk = sm.add_file("meh.v", text);
     let mut lexer = Lexer::new(chunk);
     let mut mode = LexMode::Default;
     for (kind, tt) in expected.iter().copied() {
@@ -34,13 +28,7 @@ fn quicklex_test(text: &str, expected: &[(TokenKind, &str)]) {
 
 fn quicklex_test_mode(text: &str, mode: LexMode, expected: &[(TokenKind, &str)]) {
     let sm = SourceManager::new();
-    let chunk = sm.add_chunk(
-        Box::from(text),
-        SourceChunkInfo::File {
-            file_name: Box::from("meh.v"),
-            loc_included: None,
-        },
-    );
+    let chunk = sm.add_file("meh.v", text);
     let mut lexer = Lexer::new(chunk);
     for (kind, tt) in expected.iter().copied() {
         let token = lexer.lex(mode);
