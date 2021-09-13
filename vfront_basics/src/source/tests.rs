@@ -35,6 +35,59 @@ fn test_ref_loc() {
 }
 
 #[test]
+fn test_depth() {
+    let sm = SourceManager::new();
+
+    let c1 = sm.add_file("meh.txt", "abcdef");
+    assert_eq!(c1.depth, 0);
+
+    let r2 = SourceRangeRef {
+        chunk: c1,
+        pos_start: 1,
+        pos_end: 2,
+    };
+    let c2 = sm.add_included_file("meh2.txt", r2, "abcdef");
+    assert_eq!(c2.depth, 1);
+
+    let r3 = SourceRangeRef {
+        chunk: c2,
+        pos_start: 1,
+        pos_end: 2,
+    };
+    let c3 = sm.add_included_file("meh3.txt", r3, "abcdef");
+    assert_eq!(c3.depth, 2);
+
+    let r4 = SourceRangeRef {
+        chunk: c1,
+        pos_start: 2,
+        pos_end: 3,
+    };
+    let c4 = sm.add_included_file("meh4.txt", r4, "abcdef");
+    assert_eq!(c4.depth, 1);
+
+    let r5 = SourceRangeRef {
+        chunk: c3,
+        pos_start: 1,
+        pos_end: 2,
+    };
+    let c5 = sm.add_macro_expansion("b", None, r5, "aaaaa");
+    assert_eq!(c5.depth, 3);
+
+    let r6 = SourceRangeRef {
+        chunk: c5,
+        pos_start: 1,
+        pos_end: 2,
+    };
+    let r6d = SourceRangeRef {
+        chunk: c1,
+        pos_start: 0,
+        pos_end: 1,
+    };
+    let c6 = sm.add_macro_expansion("a", Some(r6d.into()), r6, "xxxxx");
+    assert_eq!(c6.depth, 4);
+}
+
+#[test]
 fn test_line_info() {
     let text = "abc\ndef\rghi\r\njkl\n\nmno";
     let sm = SourceManager::new();

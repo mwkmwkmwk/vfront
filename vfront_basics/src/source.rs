@@ -52,6 +52,10 @@ pub struct SourceChunk {
     pub text: Box<str>,
     /// Information on where it came from.
     pub info: SourceChunkInfo,
+    /// Depth in include / macro expansion stack.  Top-level files have
+    /// depth 0, included files have depth(loc_included) + 1, macro expansions
+    /// have depth(loc_invoked) + 1.
+    pub depth: u32,
     /// The linearized position of the first byte of this chunk.
     start_vpos: NonZeroU32,
     /// Line override data, when we want locations that resolve to this file
@@ -402,7 +406,12 @@ impl SourceManager {
         }
     }
     /// Add a new chunk, return a [SourceChunk] reference.
-    fn add_chunk(&self, text: impl Into<Box<str>>, info: SourceChunkInfo) -> &SourceChunk {
+    fn add_chunk(
+        &self,
+        text: impl Into<Box<str>>,
+        depth: u32,
+        info: SourceChunkInfo,
+    ) -> &SourceChunk {
         let text = text.into();
         let start_vpos = if self.chunks.len() == 0 {
             NonZeroU32::new(1).unwrap()
@@ -424,6 +433,7 @@ impl SourceManager {
         };
         self.chunks.push_get(Box::new(SourceChunk {
             text,
+            depth,
             info,
             start_vpos,
             line_overrides: FrozenVec::new(),
@@ -435,6 +445,7 @@ impl SourceManager {
     pub fn add_file(&self, name: impl Into<Box<str>>, text: impl Into<Box<str>>) -> &SourceChunk {
         self.add_chunk(
             text,
+            0,
             SourceChunkInfo::File {
                 file_name: name.into(),
                 loc_included: None,
@@ -449,11 +460,14 @@ impl SourceManager {
         loc_included: impl Into<SourceRange>,
         text: impl Into<Box<str>>,
     ) -> &SourceChunk {
+        let loc_included = loc_included.into();
+        let loc_start = self.expand_loc(loc_included.start);
         self.add_chunk(
             text,
+            loc_start.chunk.depth + 1,
             SourceChunkInfo::File {
                 file_name: name.into(),
-                loc_included: Some(loc_included.into()),
+                loc_included: Some(loc_included),
             },
         )
     }
@@ -466,11 +480,14 @@ impl SourceManager {
         loc_invoked: impl Into<SourceRange>,
         text: impl Into<Box<str>>,
     ) -> &SourceChunk {
+        let loc_invoked = loc_invoked.into();
+        let loc_start = self.expand_loc(loc_invoked.start);
         self.add_chunk(
             text,
+            loc_start.chunk.depth + 1,
             SourceChunkInfo::MacroExpansion {
                 loc_defined,
-                loc_invoked: loc_invoked.into(),
+                loc_invoked,
                 name: name.into(),
             },
         )
