@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["diag_types","Defines a list of diagnostic types.  To be used once in every component that defines diagnostics."]],"mod":[["diag","The vfront diagnostic system."],["source","A bunch of data structures that keep the source code in memory and handle storage and processing of source location data.  The idea is similar to clang’s SourceManager:"]]});

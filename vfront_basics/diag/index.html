@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The vfront diagnostic system."><meta name="keywords" content="rust, rustlang, rust-lang, diag"><title>vfront_basics::diag - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../vfront_basics/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><h2 class="location">Module diag</h2><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><div id="sidebar-vars" data-name="diag" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">vfront_basics</a>::<wbr><a class="mod" href="#">diag</a><button id="copy-path" onclick="copy_path(this)" title="copy path"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item import" title="Copy item import to clipboard"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/vfront_basics/diag.rs.html#1-553" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The vfront diagnostic system.</p>
+<p>The system has several major moving parts:</p>
+<ul>
+<li>The main concept in the system is the <a href="struct.Diagnostic.html" title="Diagnostic"><code>Diagnostic</code></a>, which is a message that we want to show
+to the user.</li>
+<li>Every <a href="struct.Diagnostic.html" title="Diagnostic"><code>Diagnostic</code></a> has some <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>, which represents a particular kind of diagnostics.
+<ul>
+<li><a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>s have to be statically defined.</li>
+<li><a href="struct.DiagRegistry.html" title="DiagRegistry"><code>DiagRegistry</code></a> keeps track of all <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>s defined in active components.</li>
+<li>Every vfront component can define its own <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>s, and has to provide a function
+that registers its <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>s in the <a href="struct.DiagRegistry.html" title="DiagRegistry"><code>DiagRegistry</code></a>.  This is done by the <a href="../macro.diag_types.html" title="diag_types"><code>diag_types</code></a>
+macro.</li>
+</ul>
+</li>
+<li>Every <a href="struct.Diagnostic.html" title="Diagnostic"><code>Diagnostic</code></a> has an associated <a href="enum.DiagSeverity.html" title="DiagSeverity"><code>DiagSeverity</code></a> (ignore, note, warning, error, fatal),
+which determines its handling.  The default severity of a diagnostic is determined by its
+<a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>, but can be overriden by the user on per-type basis.</li>
+<li>A diagnostic also has:
+<ul>
+<li>The main message (a string).</li>
+<li>Any number of <a href="struct.DiagSpan.html" title="DiagSpan"><code>DiagSpan</code></a>s.</li>
+<li>An optional help message (which suggests a possible fix for the diagnostic).</li>
+</ul>
+</li>
+<li>A <a href="struct.DiagSpan.html" title="DiagSpan"><code>DiagSpan</code></a> is a reference to some source code related to the diagnostic.
+<ul>
+<li>A <a href="struct.DiagSpan.html" title="DiagSpan"><code>DiagSpan</code></a> has a <a href="../source/struct.SourceRange.html" title="SourceRange"><code>SourceRange</code></a> and a string message.</li>
+<li>A <a href="struct.DiagSpan.html" title="DiagSpan"><code>DiagSpan</code></a> can be primary (refers to the location of the problem), or secondary
+(refers to some code that is likely of interest, but is not the cause of the problem
+itself).</li>
+<li>Every diagnostic SHOULD have at least one primary span.  The only exception are problems
+that are really, truly not associated with any location in source code (think “undefined
+<code>main</code> function” in C).</li>
+</ul>
+</li>
+<li>The central point of diagnostic handling is <a href="struct.DiagSystem.html" title="DiagSystem"><code>DiagSystem</code></a> — all code that can emit
+diagnostics should take a <a href="struct.DiagSystem.html"><code>&amp;DiagSystem</code></a> as parameter, and a single <a href="struct.DiagSystem.html" title="DiagSystem"><code>DiagSystem</code></a> is used
+for the whole processing run.  Its responsibilities are:
+<ul>
+<li>Wrapping a <a href="trait.DiagSink.html" title="DiagSink"><code>DiagSink</code></a> and <a href="struct.DiagRegistry.html" title="DiagRegistry"><code>DiagRegistry</code></a>.</li>
+<li>Storing per-type severity overrides and applying them.</li>
+<li>Providing an easy interface to emit diagnostics.</li>
+<li>Discarding ignored diagnostics.</li>
+<li>Remembering whether an error-level diagnostic has been emitted (and thus the output
+should be considered broken, and processing aborted at some point).</li>
+</ul>
+</li>
+<li>Diagnostics are created and emitted using the <a href="struct.DiagBuilder.html" title="DiagBuilder"><code>DiagBuilder</code></a>.  The builder is obtained by
+calling <a href="struct.DiagSystem.html#method.begin" title="DiagSystem::begin"><code>DiagSystem::begin</code></a> with a type and the main message, then various methods are
+called on it to add additional data, then finally it is emitted.</li>
+<li>The final destination of diagnostics is pluggable, and represented by the <a href="trait.DiagSink.html" title="DiagSink"><code>DiagSink</code></a> trait.
+The driver creates a <a href="trait.DiagSink.html" title="DiagSink"><code>DiagSink</code></a> of whatever type it desires, then plugs it into the
+<a href="struct.DiagSystem.html" title="DiagSystem"><code>DiagSystem</code></a>, which will notify the <a href="trait.DiagSink.html" title="DiagSink"><code>DiagSink</code></a> of all emitted diagnostics.</li>
+<li>For testing purposes, <a href="struct.DiagStore.html" title="DiagStore"><code>DiagStore</code></a> is used as the diagnostics sink — it handles emitted
+diagnostics by simply storing them to an internal list, allowing for later comparison
+with “golden” diagnostics by the testcase code.</li>
+</ul>
+</div></details><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.DiagBuilder.html" title="vfront_basics::diag::DiagBuilder struct">DiagBuilder</a></div><div class="item-right docblock-short"><p>A builder for <a href="struct.Diagnostic.html" title="Diagnostic"><code>Diagnostic</code></a>s.  Created by <a href="struct.DiagSystem.html#method.begin" title="DiagSystem::begin"><code>DiagSystem::begin</code></a>.  Once all options are set,
+<a href="struct.DiagBuilder.html#method.emit" title="DiagBuilder::emit"><code>DiagBuilder::emit</code></a> should be called to actually emit the diagnostic.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.DiagRegistry.html" title="vfront_basics::diag::DiagRegistry struct">DiagRegistry</a></div><div class="item-right docblock-short"><p>A registry of all <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>s in the program.  Should be constructed once at the beginning
+of the main function by calling the diagnostic registration function of every used component.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.DiagSpan.html" title="vfront_basics::diag::DiagSpan struct">DiagSpan</a></div><div class="item-right docblock-short"><p>A code span attached to a <a href="struct.Diagnostic.html" title="Diagnostic"><code>Diagnostic</code></a>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.DiagStore.html" title="vfront_basics::diag::DiagStore struct">DiagStore</a></div><div class="item-right docblock-short"><p>A <a href="trait.DiagSink.html" title="DiagSink"><code>DiagSink</code></a> implementation that simply stores all emitted diagnostics in a vector.  Can be
+converted to <a href="https://doc.rust-lang.org/1.55.0/alloc/vec/struct.Vec.html" title="Vec&lt;Diagnostic&gt;"><code>Vec&lt;Diagnostic&gt;</code></a>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.DiagSystem.html" title="vfront_basics::diag::DiagSystem struct">DiagSystem</a></div><div class="item-right docblock-short"><p>The main structure handling all diagnostics within the program.  Generally created once
+per program run, but this is not a strict requirement.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.DiagType.html" title="vfront_basics::diag::DiagType struct">DiagType</a></div><div class="item-right docblock-short"><p>Describes a diagnostic type.  Defined using <a href="../macro.diag_types.html" title="diag_types"><code>diag_types</code></a>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.Diagnostic.html" title="vfront_basics::diag::Diagnostic struct">Diagnostic</a></div><div class="item-right docblock-short"><p>An emitted diagnostic.</p>
+</div></div><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="enum" href="enum.DiagKind.html" title="vfront_basics::diag::DiagKind enum">DiagKind</a></div><div class="item-right docblock-short"><p>The general kind of a <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>.  Determines its default severity and what severity levels
+it can be overriden to.</p>
+</div><div class="item-left module-item"><a class="enum" href="enum.DiagSeverity.html" title="vfront_basics::diag::DiagSeverity enum">DiagSeverity</a></div><div class="item-right docblock-short"><p>Determines the handling of a given diagnostic.  Normally selected by the <a href="struct.DiagType.html" title="DiagType"><code>DiagType</code></a>, but can
+be overriden by the user on per-type basis.</p>
+</div><div class="item-left module-item"><a class="enum" href="enum.DiagSpanKind.html" title="vfront_basics::diag::DiagSpanKind enum">DiagSpanKind</a></div><div class="item-right docblock-short"><p>The kind of a <a href="struct.DiagSpan.html" title="DiagSpan"><code>DiagSpan</code></a>.</p>
+</div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.DiagSink.html" title="vfront_basics::diag::DiagSink trait">DiagSink</a></div><div class="item-right docblock-short"><p>A consumer of <a href="struct.Diagnostic.html" title="Diagnostic"><code>Diagnostic</code></a>s.</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="vfront_basics" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script>
+</body></html>

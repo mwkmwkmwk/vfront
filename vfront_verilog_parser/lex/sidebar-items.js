@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Lexer","A raw lexer that will iterate through tokens from a particular [SourceChunk]."]]});
