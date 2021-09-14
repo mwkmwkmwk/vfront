@@ -1523,6 +1523,60 @@ pub enum TokenKind {
     SysDriverNextStrength,
     #[keyword("$driver_type", K_VAMS21)]
     SysDriverType,
+
+    // Compiler directives — preprocessor.
+    #[keyword("`define", K_V95)]
+    DirDefine,
+    #[keyword("`undef", K_V95)]
+    DirUndef,
+    #[keyword("`undefineall", K_SV2009)]
+    DirUndefineAll,
+    #[keyword("`ifdef", K_V95)]
+    DirIfDef,
+    #[keyword("`ifndef", K_V2001)]
+    DirIfNDef,
+    #[keyword("`else", K_V95)]
+    DirElse,
+    #[keyword("`elsif", K_V2001)]
+    DirElsIf,
+    #[keyword("`endif", K_V95)]
+    DirEndIf,
+    #[keyword("`include", K_V95)]
+    DirInclude,
+    #[keyword("`line", K_V2001)]
+    DirLine,
+    #[keyword("`begin_keywords", K_V2005)]
+    DirBeginKeywords,
+    #[keyword("`end_keywords", K_V2005)]
+    DirEndKeywords,
+    #[keyword("`__FILE__", K_SV2009)]
+    DirCurFile,
+    #[keyword("`__LINE__", K_SV2009)]
+    DirCurLine,
+
+    // Compiler directives — other.
+    #[keyword("`resetall", K_V95)]
+    DirResetAll,
+    #[keyword("`celldefine", K_V95)]
+    DirCellDefine,
+    #[keyword("`endcelldefine", K_V95)]
+    DirEndCellDefine,
+    #[keyword("`default_nettype", K_V95)]
+    DirDefaultNetType,
+    #[keyword("`timescale", K_V95)]
+    DirTimeScale,
+    #[keyword("`unconnected_drive", K_V95)]
+    DirUnconnectedDrive,
+    #[keyword("`nounconnected_drive", K_V95)]
+    DirNoUnconnectedDrive,
+    #[keyword("`pragma", K_V2005)]
+    DirPragma,
+    #[keyword("`default_nodetype", K_VA10_ONLY)]
+    DirDefaultNodeType,
+    #[keyword("`default_discipline", K_VAMS20)]
+    DirDefaultDiscipline,
+    #[keyword("`default_transition", K_VAMS20)]
+    DirDefaulTransition,
 }
 
 /// A token, as returned by the lexer or the preprocessor.
