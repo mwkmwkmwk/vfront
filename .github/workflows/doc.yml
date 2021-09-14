@@ -18,6 +18,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: doc
+          toolchain: nightly
           args: --no-deps
       - uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # v3.8.0
         with:
