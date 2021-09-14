@@ -35,6 +35,34 @@ fn test_ref_loc() {
 }
 
 #[test]
+fn test_ref() {
+    let sm = SourceManager::new();
+    let chunk = sm.add_file("meh.txt", "01234567890123456789");
+    assert_eq!(chunk.len(), 20);
+    assert_eq!(chunk.start().pos, 0);
+    assert_eq!(chunk.end().pos, 20);
+    assert_eq!(chunk.loc(3).pos, 3);
+    assert_eq!(chunk.range(3..16).pos_start, 3);
+    assert_eq!(chunk.range(3..16).pos_end, 16);
+    assert_eq!(chunk.range(3..16).start(), chunk.loc(3));
+    assert_eq!(chunk.range(3..16).end(), chunk.loc(16));
+    assert_eq!(chunk.range(..), chunk.range(0..20));
+    assert_eq!(chunk.range(3..), chunk.range(3..20));
+    assert_eq!(chunk.range(..16), chunk.range(0..16));
+    assert_eq!(chunk.range(3..=16), chunk.range(3..17));
+    assert_eq!(chunk.range(..=16), chunk.range(..17));
+    assert_eq!(chunk.range(3..16).range(..), chunk.range(3..16));
+    assert_eq!(chunk.range(3..16).range(4..10), chunk.range(7..13));
+    assert_eq!(chunk.range(3..16).range(4..), chunk.range(7..16));
+    assert_eq!(chunk.range(3..16).range(..10), chunk.range(3..13));
+    assert_eq!(chunk.range(3..16).range(4..=10), chunk.range(7..14));
+    assert_eq!(chunk.range(3..16).range(..=10), chunk.range(3..14));
+    assert_eq!(chunk.loc(5).range_len(4), chunk.range(5..9));
+    assert_eq!(chunk.loc(5).range_to(chunk.loc(11)), chunk.range(5..11));
+    assert_eq!(chunk.loc(5).compress().range_to(chunk.loc(11).compress()), chunk.range(5..11).compress());
+}
+
+#[test]
 fn test_depth() {
     let sm = SourceManager::new();
 
