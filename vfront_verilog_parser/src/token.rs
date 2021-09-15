@@ -1,6 +1,6 @@
+use crate::lang::LangMode;
 use vfront_basics::source::SourceRangeRef;
 use vfront_tokendata_derive::TokenData;
-use crate::lang::LangMode;
 
 /// Selects how tokens are recognized.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]

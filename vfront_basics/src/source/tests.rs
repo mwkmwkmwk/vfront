@@ -59,7 +59,10 @@ fn test_ref() {
     assert_eq!(chunk.range(3..16).range(..=10), chunk.range(3..14));
     assert_eq!(chunk.loc(5).range_len(4), chunk.range(5..9));
     assert_eq!(chunk.loc(5).range_to(chunk.loc(11)), chunk.range(5..11));
-    assert_eq!(chunk.loc(5).compress().range_to(chunk.loc(11).compress()), chunk.range(5..11).compress());
+    assert_eq!(
+        chunk.loc(5).compress().range_to(chunk.loc(11).compress()),
+        chunk.range(5..11).compress()
+    );
 }
 
 #[test]

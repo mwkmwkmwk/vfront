@@ -234,7 +234,10 @@ impl<'sm> Lexer<'sm> {
                 _ => (),
             }
         }
-        Token { kind, src: self.cursor.range_len(len) }
+        Token {
+            kind,
+            src: self.cursor.range_len(len),
+        }
     }
 
     pub fn step(&mut self, token: Token<'sm>) {

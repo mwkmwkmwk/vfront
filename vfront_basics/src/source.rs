@@ -43,7 +43,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
 use std::num::NonZeroU32;
-use std::ops::{Deref, RangeBounds, Bound};
+use std::ops::{Bound, Deref, RangeBounds};
 
 /// A contiguous chunk of source code, belonging to a [`SourceManager`].
 /// Can be a source file or a macro expansion.
@@ -358,30 +358,28 @@ impl SourceChunk {
     }
 
     /// Returns the length of the underlying source text in bytes.
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         self.text.len()
     }
 
     /// Returns a reference to the given position (in bytes).
-    pub fn loc<'a>(&'a self, pos: usize) -> SourceRef<'a> {
-        SourceRef {
-            chunk: self,
-            pos,
-        }
+    pub fn loc(&self, pos: usize) -> SourceRef<'_> {
+        SourceRef { chunk: self, pos }
     }
 
     /// Returns a reference to the start of the chunk.
-    pub fn start<'a>(&'a self) -> SourceRef<'a> {
+    pub fn start(&self) -> SourceRef<'_> {
         self.loc(0)
     }
 
     /// Returns a reference to the end of the chunk.
-    pub fn end<'a>(&'a self) -> SourceRef<'a> {
+    pub fn end(&self) -> SourceRef<'_> {
         self.loc(self.len())
     }
 
     /// Returns a reference to a subrange of the chunk.
-    pub fn range<'a>(&'a self, r: impl RangeBounds<usize>) -> SourceRangeRef<'a> {
+    pub fn range(&self, r: impl RangeBounds<usize>) -> SourceRangeRef<'_> {
         let res = SourceRangeRef {
             chunk: self,
             pos_start: match r.start_bound() {

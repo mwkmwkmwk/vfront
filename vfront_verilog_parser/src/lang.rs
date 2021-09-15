@@ -35,13 +35,14 @@ pub enum LangMode {
 
 impl LangMode {
     pub fn is_vams(self) -> bool {
-        matches!(self,
-            LangMode::VerilogAMS20 |
-            LangMode::VerilogAMS21 |
-            LangMode::VerilogAMS22 |
-            LangMode::VerilogAMS23 |
-            LangMode::VerilogAMS24 |
-            LangMode::SystemVerilogAMS
+        matches!(
+            self,
+            LangMode::VerilogAMS20
+                | LangMode::VerilogAMS21
+                | LangMode::VerilogAMS22
+                | LangMode::VerilogAMS23
+                | LangMode::VerilogAMS24
+                | LangMode::SystemVerilogAMS
         )
     }
 }
