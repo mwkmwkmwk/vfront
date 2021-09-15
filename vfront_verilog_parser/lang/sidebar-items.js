@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["LangMode","Selects the recognized language."]]});

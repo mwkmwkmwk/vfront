@@ -731,8 +731,6 @@
 <span id="731">731</span>
 <span id="732">732</span>
 <span id="733">733</span>
-<span id="734">734</span>
-<span id="735">735</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A bunch of data structures that keep the source code in memory and handle</span>
 <span class="doccomment">//! storage and processing of source location data.  The idea is similar</span>
 <span class="doccomment">//! to clang&#39;s SourceManager:</span>
@@ -778,7 +776,7 @@
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
 <span class="kw">use</span> <span class="ident">std::hash</span>::{<span class="ident">Hash</span>, <span class="ident">Hasher</span>};
 <span class="kw">use</span> <span class="ident">std::num::NonZeroU32</span>;
-<span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">Deref</span>, <span class="ident">RangeBounds</span>, <span class="ident">Bound</span>};
+<span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">Bound</span>, <span class="ident">Deref</span>, <span class="ident">RangeBounds</span>};
 
 <span class="doccomment">/// A contiguous chunk of source code, belonging to a [`SourceManager`].</span>
 <span class="doccomment">/// Can be a source file or a macro expansion.</span>
@@ -1093,30 +1091,28 @@
     }
 
     <span class="doccomment">/// Returns the length of the underlying source text in bytes.</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::len_without_is_empty</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>()
     }
 
     <span class="doccomment">/// Returns a reference to the given position (in bytes).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">loc</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">SourceRef</span> {
-            <span class="ident">chunk</span>: <span class="self">self</span>,
-            <span class="ident">pos</span>,
-        }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">loc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+        <span class="ident">SourceRef</span> { <span class="ident">chunk</span>: <span class="self">self</span>, <span class="ident">pos</span> }
     }
 
     <span class="doccomment">/// Returns a reference to the start of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">loc</span>(<span class="number">0</span>)
     }
 
     <span class="doccomment">/// Returns a reference to the end of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">len</span>())
     }
 
     <span class="doccomment">/// Returns a reference to a subrange of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">SourceRangeRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>,
             <span class="ident">pos_start</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">start_bound</span>() {

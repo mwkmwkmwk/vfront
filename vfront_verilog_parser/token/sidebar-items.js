@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["KeywordSet","Selects which keywords are recognized."],["LexMode","Selects how tokens are recognized."],["TokenKind","Type of a [Token]."]],"fn":[["parse_keyword",""]],"struct":[["Token","A token, as returned by the lexer or the preprocessor."]]});
+initSidebarItems({"enum":[["LexMode","Selects how tokens are recognized."],["TokenKind","Type of a [Token]."]],"fn":[["parse_keyword",""]],"struct":[["Token","A token, as returned by the lexer or the preprocessor."]]});

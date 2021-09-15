@@ -1651,38 +1651,8 @@
 <span id="1651">1651</span>
 <span id="1652">1652</span>
 <span id="1653">1653</span>
-<span id="1654">1654</span>
-<span id="1655">1655</span>
-<span id="1656">1656</span>
-<span id="1657">1657</span>
-<span id="1658">1658</span>
-<span id="1659">1659</span>
-<span id="1660">1660</span>
-<span id="1661">1661</span>
-<span id="1662">1662</span>
-<span id="1663">1663</span>
-<span id="1664">1664</span>
-<span id="1665">1665</span>
-<span id="1666">1666</span>
-<span id="1667">1667</span>
-<span id="1668">1668</span>
-<span id="1669">1669</span>
-<span id="1670">1670</span>
-<span id="1671">1671</span>
-<span id="1672">1672</span>
-<span id="1673">1673</span>
-<span id="1674">1674</span>
-<span id="1675">1675</span>
-<span id="1676">1676</span>
-<span id="1677">1677</span>
-<span id="1678">1678</span>
-<span id="1679">1679</span>
-<span id="1680">1680</span>
-<span id="1681">1681</span>
-<span id="1682">1682</span>
-<span id="1683">1683</span>
-<span id="1684">1684</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">vfront_basics::source::SourceRangeRef</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lang::LangMode</span>;
+<span class="kw">use</span> <span class="ident">vfront_basics::source::SourceRangeRef</span>;
 <span class="kw">use</span> <span class="ident">vfront_tokendata_derive::TokenData</span>;
 
 <span class="doccomment">/// Selects how tokens are recognized.</span>
@@ -3270,39 +3240,6 @@
     <span class="kw">pub</span> <span class="ident">src</span>: <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;sm</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Selects which keywords are recognized.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">KeywordSet</span> {
-    <span class="doccomment">/// IEEE 1364-1995 keywords.</span>
-    <span class="ident">Verilog1995</span>,
-    <span class="doccomment">/// IEEE 1364-2001 keywords.</span>
-    <span class="ident">Verilog2001</span>,
-    <span class="doccomment">/// IEEE 1364-2001 keywords, but without config-related keywords.</span>
-    <span class="ident">Verilog2001NoConfig</span>,
-    <span class="doccomment">/// IEEE 1364-2005 keywords.</span>
-    <span class="ident">Verilog2005</span>,
-    <span class="doccomment">/// IEEE 1800-2005 keywords.</span>
-    <span class="ident">SystemVerilog2005</span>,
-    <span class="doccomment">/// IEEE 1800-2009 keywords.</span>
-    <span class="ident">SystemVerilog2009</span>,
-    <span class="doccomment">/// IEEE 1800-2012 and 1800-2017 keywords.</span>
-    <span class="ident">SystemVerilog2012</span>,
-    <span class="doccomment">/// Verilog-A 1.0 keywords.</span>
-    <span class="ident">VerilogA10</span>,
-    <span class="doccomment">/// Verilog-AMS 2.0 keywords (Verilog1995-based).</span>
-    <span class="ident">VerilogAMS20</span>,
-    <span class="doccomment">/// Verilog-AMS 2.1 keywords (Verilog1995-based).</span>
-    <span class="ident">VerilogAMS21</span>,
-    <span class="doccomment">/// Verilog-AMS 2.2 keywords (Verilog1995-based).</span>
-    <span class="ident">VerilogAMS22</span>,
-    <span class="doccomment">/// Verilog-AMS 2.3 keywords (Verilog2005-based).</span>
-    <span class="ident">VerilogAMS23</span>,
-    <span class="doccomment">/// Verilog-AMS 2.4 keywords (Verilog2005-based).</span>
-    <span class="ident">VerilogAMS24</span>,
-    <span class="doccomment">/// And you thought Objective-C++ was bad?</span>
-    <span class="ident">SystemVerilogAMS</span>,
-}
-
 <span class="comment">// Some bitmasks that describe which languages the given keywords are actually keywords.</span>
 
 <span class="comment">// If a given bit is lit in keyword descriptor, the keyword is supported in that language.</span>
@@ -3337,27 +3274,28 @@
 <span class="kw">const</span> <span class="ident">K_VAMS23</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1800</span>;
 <span class="kw">const</span> <span class="ident">K_VAMS24</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1000</span>;
 
-<span class="kw">fn</span> <span class="ident">is_keyword_in</span>(<span class="ident">lmask</span>: <span class="ident">u32</span>, <span class="ident">kwset</span>: <span class="ident">KeywordSet</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_keyword_in</span>(<span class="ident">lmask</span>: <span class="ident">u32</span>, <span class="ident">kwset</span>: <span class="ident">LangMode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">kwset</span> {
-        <span class="ident">KeywordSet::Verilog1995</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V95</span>,
-        <span class="ident">KeywordSet::Verilog2001</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V2001</span>,
-        <span class="ident">KeywordSet::Verilog2001NoConfig</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V2001_NO_CFG</span>,
-        <span class="ident">KeywordSet::Verilog2005</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V2005</span>,
-        <span class="ident">KeywordSet::SystemVerilog2005</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2005</span>,
-        <span class="ident">KeywordSet::SystemVerilog2009</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2009</span>,
-        <span class="ident">KeywordSet::SystemVerilog2012</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2012</span>,
-        <span class="ident">KeywordSet::VerilogA10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VA10</span>,
-        <span class="ident">KeywordSet::VerilogAMS20</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS20</span>,
-        <span class="ident">KeywordSet::VerilogAMS21</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS21</span>,
-        <span class="ident">KeywordSet::VerilogAMS22</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS22</span>,
-        <span class="ident">KeywordSet::VerilogAMS23</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS23</span>,
-        <span class="ident">KeywordSet::VerilogAMS24</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS24</span>,
-        <span class="ident">KeywordSet::SystemVerilogAMS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_ANY</span>,
+        <span class="ident">LangMode::Verilog1995</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V95</span>,
+        <span class="ident">LangMode::Verilog2001</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V2001</span>,
+        <span class="ident">LangMode::Verilog2001NoConfig</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V2001_NO_CFG</span>,
+        <span class="ident">LangMode::Verilog2005</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_V2005</span>,
+        <span class="ident">LangMode::SystemVerilog2005</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2005</span>,
+        <span class="ident">LangMode::SystemVerilog2009</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2009</span>,
+        <span class="ident">LangMode::SystemVerilog2012</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2012</span>,
+        <span class="ident">LangMode::SystemVerilog2017</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_SV2012</span>,
+        <span class="ident">LangMode::VerilogA10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VA10</span>,
+        <span class="ident">LangMode::VerilogAMS20</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS20</span>,
+        <span class="ident">LangMode::VerilogAMS21</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS21</span>,
+        <span class="ident">LangMode::VerilogAMS22</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS22</span>,
+        <span class="ident">LangMode::VerilogAMS23</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS23</span>,
+        <span class="ident">LangMode::VerilogAMS24</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_VAMS24</span>,
+        <span class="ident">LangMode::SystemVerilogAMS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L_ANY</span>,
     };
     (<span class="ident">l</span> <span class="op">&amp;</span> <span class="ident">lmask</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_keyword</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">kwset</span>: <span class="ident">KeywordSet</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TokenKind</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_keyword</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">kwset</span>: <span class="ident">LangMode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TokenKind</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">TokenKind::KEYWORDS</span>.<span class="ident">get</span>(<span class="ident">s</span>) {
         <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>(<span class="ident">tk</span>, <span class="ident">lmask</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">is_keyword_in</span>(<span class="ident">lmask</span>, <span class="ident">kwset</span>).<span class="ident">then</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">tk</span>),
         <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,

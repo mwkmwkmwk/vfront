@@ -252,6 +252,9 @@
 <span id="252">252</span>
 <span id="253">253</span>
 <span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::token</span>::{<span class="ident">LexMode</span>, <span class="ident">Token</span>, <span class="ident">TokenKind</span>};
 <span class="kw">use</span> <span class="ident">vfront_basics::source</span>::{<span class="ident">SourceChunk</span>, <span class="ident">SourceRef</span>};
 
@@ -488,7 +491,10 @@
                 <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
             }
         }
-        <span class="ident">Token</span> { <span class="ident">kind</span>, <span class="ident">src</span>: <span class="self">self</span>.<span class="ident">cursor</span>.<span class="ident">range_len</span>(<span class="ident">len</span>) }
+        <span class="ident">Token</span> {
+            <span class="ident">kind</span>,
+            <span class="ident">src</span>: <span class="self">self</span>.<span class="ident">cursor</span>.<span class="ident">range_len</span>(<span class="ident">len</span>),
+        }
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">token</span>: <span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;sm</span><span class="op">&gt;</span>) {
