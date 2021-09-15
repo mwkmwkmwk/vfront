@@ -624,41 +624,150 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A bunch of data structures that keep the source code in memory and handle</span>
 <span class="doccomment">//! storage and processing of source location data.  The idea is similar</span>
 <span class="doccomment">//! to clang&#39;s SourceManager:</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - There is one [SourceManager] for the whole design that contains all</span>
+<span class="doccomment">//! - There is one [`SourceManager`] for the whole design that contains all</span>
 <span class="doccomment">//!   source code involved.</span>
-<span class="doccomment">//! - The source code is made of [SourceChunk]s, which are either files or macro</span>
+<span class="doccomment">//! - The source code is made of [`SourceChunk`]s, which are either files or macro</span>
 <span class="doccomment">//!   expansions, and are wholesale loaded into memory as a single str.</span>
-<span class="doccomment">//! - All [SourceChunk]s are conceptually concatenated into one big linear array</span>
+<span class="doccomment">//! - All [`SourceChunk`]s are conceptually concatenated into one big linear array</span>
 <span class="doccomment">//!   of bytes, and every source location can thus be stored as a single</span>
-<span class="doccomment">//!   u32 that is a byte index into this virtual array (called [SourceLoc]).</span>
+<span class="doccomment">//!   u32 that is a byte index into this virtual array (called [`SourceLoc`]).</span>
 <span class="doccomment">//!   Note that this array is never actually materialized — we just store the</span>
-<span class="doccomment">//!   virtual start position of every [SourceChunk] and use binary search when</span>
-<span class="doccomment">//!   looking up a [SourceLoc].</span>
-<span class="doccomment">//! - For immediate access to the source, we also have [SourceRef], which can</span>
-<span class="doccomment">//!   be considered an unpacked form of [SourceLoc].  This can be used to</span>
-<span class="doccomment">//!   directly access the backing storage of a given [SourceChunk].</span>
-<span class="doccomment">//! - [SourceRange] is a range of two [SourceLoc] that belong to the same chunk,</span>
-<span class="doccomment">//!   [SourceRangeRef] is an unpacked version, which also can be directly used</span>
+<span class="doccomment">//!   virtual start position of every [`SourceChunk`] and use binary search when</span>
+<span class="doccomment">//!   looking up a [`SourceLoc`].</span>
+<span class="doccomment">//! - For immediate access to the source, we also have [`SourceRef`], which can</span>
+<span class="doccomment">//!   be considered an unpacked form of [`SourceLoc`].  This can be used to</span>
+<span class="doccomment">//!   directly access the backing storage of a given [`SourceChunk`].</span>
+<span class="doccomment">//! - [`SourceRange`] is a range of two [`SourceLoc`] that belong to the same chunk,</span>
+<span class="doccomment">//!   [`SourceRangeRef`] is an unpacked version, which also can be directly used</span>
 <span class="doccomment">//!   as as string.</span>
 <span class="doccomment">//! - When it is necessary to print a diagnostic, run</span>
-<span class="doccomment">//!   [SourceManager::get_line_info] on a location to obtain its</span>
+<span class="doccomment">//!   [`SourceManager::get_line_info`] on a location to obtain its</span>
 <span class="doccomment">//!   decoded source position.  If the decoded position is within a macro, use</span>
-<span class="doccomment">//!   [SourceChunkInfo::MacroExpansion::loc_invoked] to obtain its definition</span>
+<span class="doccomment">//!   [`SourceChunkInfo::MacroExpansion::loc_invoked`] to obtain its definition</span>
 <span class="doccomment">//!   place, and keep printing position data from there.  If the decoded</span>
-<span class="doccomment">//!   position is an included file, use [SourceChunkInfo::File::loc_included]</span>
+<span class="doccomment">//!   position is an included file, use [`SourceChunkInfo::File::loc_included`]</span>
 <span class="doccomment">//!   to iterate up the include stack.</span>
 <span class="doccomment">//! - When a simple file+line+column triple is needed (for export to something</span>
 <span class="doccomment">//!   that has a fixed idea of a location),</span>
-<span class="doccomment">//!   [SourceManager::get_simple_line_info] can be called to obtain such.</span>
+<span class="doccomment">//!   [`SourceManager::get_simple_line_info`] can be called to obtain such.</span>
 <span class="doccomment">//!   This will automatically go up the macro invocation stack, if any, to</span>
 <span class="doccomment">//!   obtain an actual file location.</span>
 <span class="doccomment">//! - To support Verilog `line directive and similar constructs, line override</span>
 <span class="doccomment">//!   entries can be added to chunks.  Doing this will cause</span>
-<span class="doccomment">//!   [SourceManager::get_line_info] to return the overriden location data in</span>
+<span class="doccomment">//!   [`SourceManager::get_line_info`] to return the overriden location data in</span>
 <span class="doccomment">//!   addition to the true location.  Note that line override entries must be</span>
 <span class="doccomment">//!   added in position order.</span>
 
@@ -669,9 +778,9 @@
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
 <span class="kw">use</span> <span class="ident">std::hash</span>::{<span class="ident">Hash</span>, <span class="ident">Hasher</span>};
 <span class="kw">use</span> <span class="ident">std::num::NonZeroU32</span>;
-<span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
+<span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">Deref</span>, <span class="ident">RangeBounds</span>, <span class="ident">Bound</span>};
 
-<span class="doccomment">/// A contiguous chunk of source code, belonging to a [SourceManager].</span>
+<span class="doccomment">/// A contiguous chunk of source code, belonging to a [`SourceManager`].</span>
 <span class="doccomment">/// Can be a source file or a macro expansion.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceChunk</span> {
     <span class="doccomment">/// The meat of this chunk.</span>
@@ -692,7 +801,7 @@
     <span class="ident">raw_line_table</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">usize</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Information about how a [SourceChunk] was created.</span>
+<span class="doccomment">/// Information about how a [`SourceChunk`] was created.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SourceChunkInfo</span> {
     <span class="doccomment">/// A source chunk that was loaded from a file.</span>
@@ -734,8 +843,11 @@
 <span class="doccomment">/// Describes the kind of a line override entry (the third argument of `line).</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SourceLineOverrideKind</span> {
+    <span class="doccomment">/// No include file level change.</span>
     <span class="ident">Plain</span>,
+    <span class="doccomment">/// Entering an include file.</span>
     <span class="ident">IncludeEnter</span>,
+    <span class="doccomment">/// Exiting an include file.</span>
     <span class="ident">IncludeExit</span>,
 }
 
@@ -749,19 +861,21 @@
 
 <span class="doccomment">/// A compressed representation of a location in the source code, to be used</span>
 <span class="doccomment">/// in ASTs and other long-term storage places.  Only has meaning in relation</span>
-<span class="doccomment">/// to a given [SourceManager], and can be unpacked into a [SourceRef] when</span>
-<span class="doccomment">/// necessary.  Consists of a single [NonZeroU32] (so that [Option&lt;SourceLoc&gt;]</span>
-<span class="doccomment">/// is as cheap as a plain [SourceLoc], when necessary).</span>
+<span class="doccomment">/// to a given [`SourceManager`], and can be unpacked into a [`SourceRef`] when</span>
+<span class="doccomment">/// necessary.  Consists of a single [`NonZeroU32`] (so that [`Option&lt;SourceLoc&gt;`]</span>
+<span class="doccomment">/// is as cheap as a plain [`SourceLoc`], when necessary).</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceLoc</span> {
     <span class="ident">vpos</span>: <span class="ident">NonZeroU32</span>,
 }
 
-<span class="doccomment">/// A half-open range of two [SourceLoc]s that must belong to the same</span>
-<span class="doccomment">/// [SourceChunk].</span>
+<span class="doccomment">/// A half-open range of two [`SourceLoc`]s that may or may not belong to</span>
+<span class="doccomment">/// the same [`SourceChunk`].</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceRange</span> {
+    <span class="doccomment">/// Start location, included.</span>
     <span class="kw">pub</span> <span class="ident">start</span>: <span class="ident">SourceLoc</span>,
+    <span class="doccomment">/// End location, excluded.</span>
     <span class="kw">pub</span> <span class="ident">end</span>: <span class="ident">SourceLoc</span>,
 }
 
@@ -771,16 +885,21 @@
 <span class="doccomment">/// the text.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The containing chunk.</span>
     <span class="kw">pub</span> <span class="ident">chunk</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SourceChunk</span>,
+    <span class="doccomment">/// The position, in bytes, within the chunk.</span>
     <span class="kw">pub</span> <span class="ident">pos</span>: <span class="ident">usize</span>,
 }
 
 <span class="doccomment">/// An uncompressed representation of a range of locations in the source code,</span>
-<span class="doccomment">/// analogous to [SourceRef].  Can be dereferenced to obtain underlying str.</span>
+<span class="doccomment">/// analogous to [`SourceRef`].  Can be dereferenced to obtain underlying str.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The containing chunk.</span>
     <span class="kw">pub</span> <span class="ident">chunk</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SourceChunk</span>,
+    <span class="doccomment">/// The start position, in bytes, within the chunk (included).</span>
     <span class="kw">pub</span> <span class="ident">pos_start</span>: <span class="ident">usize</span>,
+    <span class="doccomment">/// The end position, in bytes, within the chunk (excluded).</span>
     <span class="kw">pub</span> <span class="ident">pos_end</span>: <span class="ident">usize</span>,
 }
 
@@ -789,14 +908,18 @@
 <span class="doccomment">/// macros are involved, this is the location of the top macro invocation.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceSimpleLineInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The file name containing the location.</span>
     <span class="kw">pub</span> <span class="ident">file_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="doccomment">/// The line number, 1-based.</span>
     <span class="kw">pub</span> <span class="ident">line_num</span>: <span class="ident">usize</span>,
+    <span class="doccomment">/// The column number, 1-based.  This is a simple byte count.</span>
     <span class="kw">pub</span> <span class="ident">column_num</span>: <span class="ident">usize</span>,
 }
 
 <span class="doccomment">/// Result of looking up a line number.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceLineInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The chunk containing the location.</span>
     <span class="kw">pub</span> <span class="ident">chunk</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SourceChunk</span>,
     <span class="doccomment">/// Raw line number, 1-based.</span>
     <span class="kw">pub</span> <span class="ident">line_num</span>: <span class="ident">usize</span>,
@@ -968,6 +1091,49 @@
             <span class="ident">overrides</span>: <span class="ident">overrides</span>.<span class="ident">into_boxed_slice</span>(),
         }
     }
+
+    <span class="doccomment">/// Returns the length of the underlying source text in bytes.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>()
+    }
+
+    <span class="doccomment">/// Returns a reference to the given position (in bytes).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">loc</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="ident">SourceRef</span> {
+            <span class="ident">chunk</span>: <span class="self">self</span>,
+            <span class="ident">pos</span>,
+        }
+    }
+
+    <span class="doccomment">/// Returns a reference to the start of the chunk.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">loc</span>(<span class="number">0</span>)
+    }
+
+    <span class="doccomment">/// Returns a reference to the end of the chunk.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">len</span>())
+    }
+
+    <span class="doccomment">/// Returns a reference to a subrange of the chunk.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">SourceRangeRef</span> {
+            <span class="ident">chunk</span>: <span class="self">self</span>,
+            <span class="ident">pos_start</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">start_bound</span>() {
+                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+            },
+            <span class="ident">pos_end</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">end_bound</span>() {
+                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>(),
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+            },
+        };
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">pos_start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">res</span>.<span class="ident">pos_end</span>);
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">pos_end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>());
+        <span class="ident">res</span>
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">SourceChunk</span> {
@@ -997,7 +1163,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">SourceManager</span> {
-    <span class="doccomment">/// Expand a [SourceLoc] into a [SourceRef].</span>
+    <span class="doccomment">/// Expand a [`SourceLoc`] into a [`SourceRef`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_loc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span> {
         <span class="comment">// If we have a valid loc in hand, a chunk must already exist.</span>
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">chunks</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
@@ -1019,7 +1185,7 @@
         <span class="macro">assert!</span>(<span class="ident">pos</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">chunk</span>.<span class="ident">text</span>.<span class="ident">len</span>());
         <span class="ident">SourceRef</span> { <span class="ident">chunk</span>, <span class="ident">pos</span> }
     }
-    <span class="doccomment">/// Expand a [SourceRange] into a [SourceRangeRef].</span>
+    <span class="doccomment">/// Expand a [`SourceRange`] into a [`SourceRangeRef`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">SourceRange</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span> {
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">range</span>.<span class="ident">start</span>);
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">end</span>.<span class="ident">vpos</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">start</span>.<span class="ident">chunk</span>.<span class="ident">start_vpos</span>);
@@ -1031,7 +1197,7 @@
             <span class="ident">pos_end</span>,
         }
     }
-    <span class="doccomment">/// Add a new chunk, return a [SourceChunk] reference.</span>
+    <span class="doccomment">/// Add a new chunk, return a [`SourceChunk`] reference.</span>
     <span class="kw">fn</span> <span class="ident">add_chunk</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -1119,19 +1285,19 @@
         )
     }
 
-    <span class="doccomment">/// Creates a new [SourceManager].</span>
+    <span class="doccomment">/// Creates a new [`SourceManager`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">SourceManager</span> {
             <span class="ident">chunks</span>: <span class="ident">FrozenVec::new</span>(),
         }
     }
 
-    <span class="doccomment">/// Decodes a [SourceLoc] directly to [SourceLineInfo].</span>
+    <span class="doccomment">/// Decodes a [`SourceLoc`] directly to [`SourceLineInfo`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLineInfo</span> {
         <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">loc</span>).<span class="ident">get_line_info</span>()
     }
 
-    <span class="doccomment">/// Decodes a [SourceLoc] into [SourceSimpleLineInfo].</span>
+    <span class="doccomment">/// Decodes a [`SourceLoc`] into [`SourceSimpleLineInfo`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_simple_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceSimpleLineInfo</span> {
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">sr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">loc</span>);
@@ -1167,20 +1333,25 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">SourceLoc</span> {
+    <span class="doccomment">/// Returns a [`SourceRange`] starting at this location and ending at the other location.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRange</span> {
+        <span class="ident">SourceRange</span> {
+            <span class="ident">start</span>: <span class="kw-2">*</span><span class="self">self</span>,
+            <span class="ident">end</span>: <span class="ident">other</span>,
+        }
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SourceLoc</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">src</span>: <span class="ident">SourceRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">SourceLoc</span> {
-            <span class="ident">vpos</span>: <span class="ident">NonZeroU32::new</span>(<span class="ident">src</span>.<span class="ident">chunk</span>.<span class="ident">start_vpos</span>.<span class="ident">get</span>() <span class="op">+</span> (<span class="ident">src</span>.<span class="ident">pos</span> <span class="kw">as</span> <span class="ident">u32</span>)).<span class="ident">unwrap</span>(),
-        }
+        <span class="ident">src</span>.<span class="ident">compress</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SourceRange</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">src</span>: <span class="ident">SourceRangeRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">SourceRange</span> {
-            <span class="ident">start</span>: <span class="ident">src</span>.<span class="ident">start</span>().<span class="ident">into</span>(),
-            <span class="ident">end</span>: <span class="ident">src</span>.<span class="ident">end</span>().<span class="ident">into</span>(),
-        }
+        <span class="ident">src</span>.<span class="ident">compress</span>()
     }
 }
 
@@ -1193,6 +1364,7 @@
 
     <span class="doccomment">/// Returns a range of given length starting from this position.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">len</span>());
         <span class="ident">SourceRangeRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos_start</span>: <span class="self">self</span>.<span class="ident">pos</span>,
@@ -1200,7 +1372,17 @@
         }
     }
 
-    <span class="doccomment">/// Add a new line override.  Calls the underlying [SourceChunk] method.</span>
+    <span class="doccomment">/// Returns a range starting at this location and ending at the other location.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="macro">assert_eq!</span>(<span class="self">self</span>.<span class="ident">chunk</span>, <span class="ident">other</span>.<span class="ident">chunk</span>);
+        <span class="ident">SourceRangeRef</span> {
+            <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
+            <span class="ident">pos_start</span>: <span class="self">self</span>.<span class="ident">pos</span>,
+            <span class="ident">pos_end</span>: <span class="ident">other</span>.<span class="ident">pos</span>,
+        }
+    }
+
+    <span class="doccomment">/// Add a new line override.  Calls the underlying [`SourceChunk`] method.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_line_override</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">file_name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -1215,21 +1397,57 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLineInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">get_line_info</span>(<span class="self">self</span>.<span class="ident">pos</span>)
     }
+
+    <span class="doccomment">/// Converts into a [`SourceLoc`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLoc</span> {
+        <span class="ident">SourceLoc</span> {
+            <span class="ident">vpos</span>: <span class="ident">NonZeroU32::new</span>(<span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">start_vpos</span>.<span class="ident">get</span>() <span class="op">+</span> (<span class="self">self</span>.<span class="ident">pos</span> <span class="kw">as</span> <span class="ident">u32</span>)).<span class="ident">unwrap</span>(),
+        }
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Return a [SourceRef] corresponding to start of this range.</span>
+    <span class="doccomment">/// Return a [`SourceRef`] corresponding to start of this range.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">SourceRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos</span>: <span class="self">self</span>.<span class="ident">pos_start</span>,
         }
     }
-    <span class="doccomment">/// Return a [SourceRef] corresponding to end of this range.</span>
+
+    <span class="doccomment">/// Return a [`SourceRef`] corresponding to end of this range.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">SourceRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos</span>: <span class="self">self</span>.<span class="ident">pos_end</span>,
+        }
+    }
+
+    <span class="doccomment">/// Returns a subrange of this range.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">SourceRangeRef</span> {
+            <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
+            <span class="ident">pos_start</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">start_bound</span>() {
+                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span>,
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+            },
+            <span class="ident">pos_end</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">end_bound</span>() {
+                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_end</span>,
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span>,
+            },
+        };
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">pos_start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">res</span>.<span class="ident">pos_end</span>);
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">pos_end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">pos_end</span>);
+        <span class="ident">res</span>
+    }
+
+    <span class="doccomment">/// Converts into a [`SourceRange`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRange</span> {
+        <span class="ident">SourceRange</span> {
+            <span class="ident">start</span>: <span class="self">self</span>.<span class="ident">start</span>().<span class="ident">into</span>(),
+            <span class="ident">end</span>: <span class="self">self</span>.<span class="ident">end</span>().<span class="ident">into</span>(),
         }
     }
 }
