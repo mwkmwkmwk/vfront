@@ -51,14 +51,14 @@ impl<'sm> Lexer<'sm> {
     /// Creates a new lexer.
     pub fn new(chunk: &'sm SourceChunk) -> Self {
         Lexer {
-            cursor: SourceRef { chunk, pos: 0 },
+            cursor: chunk.start(),
         }
     }
 
     /// Returns a token according to the selected mode and steps over it.
     /// Note that the lexer doesn't recognize keywords — this task is done
     /// by the preprocessor.
-    pub fn lex(&mut self, mode: LexMode) -> Token<'sm> {
+    pub fn peek(&self, mode: LexMode) -> Token<'sm> {
         let suffix = self.cursor.suffix();
         let (mut kind, mut len) = TokenKind::recognize_easy(suffix);
         if suffix.starts_with("//") {
@@ -234,9 +234,19 @@ impl<'sm> Lexer<'sm> {
                 _ => (),
             }
         }
-        let src = self.cursor.range_len(len);
-        self.cursor = src.end();
-        Token { kind, src }
+        Token { kind, src: self.cursor.range_len(len) }
+    }
+
+    pub fn step(&mut self, token: Token<'sm>) {
+        debug_assert_eq!(self.cursor.chunk, token.src.chunk);
+        debug_assert_eq!(self.cursor.pos, token.src.pos_start);
+        self.cursor = token.src.end();
+    }
+
+    pub fn lex(&mut self, mode: LexMode) -> Token<'sm> {
+        let res = self.peek(mode);
+        self.step(res);
+        res
     }
 }
 
