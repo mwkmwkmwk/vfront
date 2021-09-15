@@ -1,5 +1,6 @@
 use vfront_basics::source::SourceRangeRef;
 use vfront_tokendata_derive::TokenData;
+use crate::lang::LangMode;
 
 /// Selects how tokens are recognized.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -1586,39 +1587,6 @@ pub struct Token<'sm> {
     pub src: SourceRangeRef<'sm>,
 }
 
-/// Selects which keywords are recognized.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum KeywordSet {
-    /// IEEE 1364-1995 keywords.
-    Verilog1995,
-    /// IEEE 1364-2001 keywords.
-    Verilog2001,
-    /// IEEE 1364-2001 keywords, but without config-related keywords.
-    Verilog2001NoConfig,
-    /// IEEE 1364-2005 keywords.
-    Verilog2005,
-    /// IEEE 1800-2005 keywords.
-    SystemVerilog2005,
-    /// IEEE 1800-2009 keywords.
-    SystemVerilog2009,
-    /// IEEE 1800-2012 and 1800-2017 keywords.
-    SystemVerilog2012,
-    /// Verilog-A 1.0 keywords.
-    VerilogA10,
-    /// Verilog-AMS 2.0 keywords (Verilog1995-based).
-    VerilogAMS20,
-    /// Verilog-AMS 2.1 keywords (Verilog1995-based).
-    VerilogAMS21,
-    /// Verilog-AMS 2.2 keywords (Verilog1995-based).
-    VerilogAMS22,
-    /// Verilog-AMS 2.3 keywords (Verilog2005-based).
-    VerilogAMS23,
-    /// Verilog-AMS 2.4 keywords (Verilog2005-based).
-    VerilogAMS24,
-    /// And you thought Objective-C++ was bad?
-    SystemVerilogAMS,
-}
-
 // Some bitmasks that describe which languages the given keywords are actually keywords.
 
 // If a given bit is lit in keyword descriptor, the keyword is supported in that language.
@@ -1653,27 +1621,28 @@ const K_VAMS22: u32 = 0x1c00;
 const K_VAMS23: u32 = 0x1800;
 const K_VAMS24: u32 = 0x1000;
 
-fn is_keyword_in(lmask: u32, kwset: KeywordSet) -> bool {
+fn is_keyword_in(lmask: u32, kwset: LangMode) -> bool {
     let l = match kwset {
-        KeywordSet::Verilog1995 => L_V95,
-        KeywordSet::Verilog2001 => L_V2001,
-        KeywordSet::Verilog2001NoConfig => L_V2001_NO_CFG,
-        KeywordSet::Verilog2005 => L_V2005,
-        KeywordSet::SystemVerilog2005 => L_SV2005,
-        KeywordSet::SystemVerilog2009 => L_SV2009,
-        KeywordSet::SystemVerilog2012 => L_SV2012,
-        KeywordSet::VerilogA10 => L_VA10,
-        KeywordSet::VerilogAMS20 => L_VAMS20,
-        KeywordSet::VerilogAMS21 => L_VAMS21,
-        KeywordSet::VerilogAMS22 => L_VAMS22,
-        KeywordSet::VerilogAMS23 => L_VAMS23,
-        KeywordSet::VerilogAMS24 => L_VAMS24,
-        KeywordSet::SystemVerilogAMS => L_ANY,
+        LangMode::Verilog1995 => L_V95,
+        LangMode::Verilog2001 => L_V2001,
+        LangMode::Verilog2001NoConfig => L_V2001_NO_CFG,
+        LangMode::Verilog2005 => L_V2005,
+        LangMode::SystemVerilog2005 => L_SV2005,
+        LangMode::SystemVerilog2009 => L_SV2009,
+        LangMode::SystemVerilog2012 => L_SV2012,
+        LangMode::SystemVerilog2017 => L_SV2012,
+        LangMode::VerilogA10 => L_VA10,
+        LangMode::VerilogAMS20 => L_VAMS20,
+        LangMode::VerilogAMS21 => L_VAMS21,
+        LangMode::VerilogAMS22 => L_VAMS22,
+        LangMode::VerilogAMS23 => L_VAMS23,
+        LangMode::VerilogAMS24 => L_VAMS24,
+        LangMode::SystemVerilogAMS => L_ANY,
     };
     (l & lmask) != 0
 }
 
-pub fn parse_keyword(s: &str, kwset: KeywordSet) -> Option<TokenKind> {
+pub fn parse_keyword(s: &str, kwset: LangMode) -> Option<TokenKind> {
     match TokenKind::KEYWORDS.get(s) {
         Some(&(tk, lmask)) => is_keyword_in(lmask, kwset).then(|| tk),
         None => None,
