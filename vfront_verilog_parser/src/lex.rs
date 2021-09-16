@@ -36,17 +36,6 @@ impl LexMode {
     }
 }
 
-fn eat_chars(s: &str, skip: usize, mut pred: impl FnMut(char) -> bool) -> usize {
-    s[skip..]
-        .find(|x| !pred(x))
-        .map(|x| x + skip)
-        .unwrap_or(s.len())
-}
-
-fn char_at(s: &str, pos: usize) -> Option<char> {
-    s[pos..].chars().next()
-}
-
 impl<'sm> Lexer<'sm> {
     /// Creates a new lexer.
     pub fn new(chunk: &'sm SourceChunk) -> Self {
@@ -59,116 +48,102 @@ impl<'sm> Lexer<'sm> {
     /// Note that the lexer doesn't recognize keywords — this task is done
     /// by the preprocessor.
     pub fn peek(&self, mode: LexMode) -> Token<'sm> {
-        let suffix = self.cursor.suffix();
-        let (mut kind, mut len) = TokenKind::recognize_easy(suffix);
-        if suffix.starts_with("//") {
+        let mut reader = self.cursor.reader();
+        let (mut kind, len) = TokenKind::recognize_easy(reader.suffix());
+        if reader.try_eat("//") {
             kind = TokenKind::LineComment;
-            len = eat_chars(suffix, 0, |x| x != '\r' && x != '\n');
-        } else if let Some(csuffix) = suffix.strip_prefix("/*") {
-            match csuffix.find("*/") {
+            reader.eat_while(|x| x != '\r' && x != '\n');
+        } else if reader.try_eat("/*") {
+            match reader.suffix().find("*/") {
                 Some(n) => {
                     kind = TokenKind::BlockComment;
-                    len = n + 4;
+                    reader.advance(n + 2);
                 }
                 None => {
                     kind = TokenKind::BlockCommentUnclosed;
-                    len = suffix.len();
+                    reader.move_to(reader.end());
                 }
             }
-        } else if suffix.starts_with('<') && mode == LexMode::Include {
+        } else if mode == LexMode::Include && reader.try_eat("<") {
             // We're right after `include — if we see a < now, it's
             // a funny-quoted string, not an operator.
             // It appears the grammar of <> strings isn't actually
             // defined anywhere.  Ah well.
-            let n = eat_chars(suffix, 0, |c| !matches!(c, '\r' | '\n' | '>'));
-            if suffix[n..].starts_with('>') {
+            reader.eat_while(|c| !matches!(c, '\r' | '\n' | '>'));
+            if reader.try_eat(">") {
                 // The good ending.
                 kind = TokenKind::LtGtString;
-                len = n + 1;
             } else {
                 // The bad ending.
                 kind = TokenKind::LtGtStringUnclosed;
-                len = n;
             }
-        } else if kind == TokenKind::Backslash {
+        } else if reader.try_eat("\\") {
             // Try for an escaped ID.
-            len = eat_chars(suffix, 1, |c| !c.is_whitespace());
-            if len != 1 {
+            if !reader.eat_while(|c| !c.is_whitespace()).is_empty() {
                 kind = TokenKind::EscapedId;
             }
-        } else if kind == TokenKind::Dollar {
-            len = eat_chars(suffix, 1, is_id_cont);
-            if len != 1 {
+        } else if reader.try_eat("$") {
+            if !reader.eat_while(is_id_cont).is_empty() {
                 kind = TokenKind::SystemId;
             }
-        } else if suffix.starts_with('`') {
-            let mut chars = suffix.char_indices();
-            // Skip the ` itself.
-            chars.next();
-            if let Some((_, c)) = chars.next() {
-                if is_id_start(c) {
-                    kind = TokenKind::Directive;
-                    len = eat_chars(suffix, 1, is_id_cont);
-                }
+        } else if kind == TokenKind::Unknown && reader.try_eat("`") {
+            if reader.eat_if(is_id_start).is_some() {
+                kind = TokenKind::Directive;
+                reader.eat_while(is_id_cont);
             }
-        } else if suffix.starts_with('"') {
+        } else if reader.try_eat("\"") {
             // String parsing.
-            let mut chars = suffix.char_indices();
-            chars.next();
             loop {
-                match chars.next() {
+                reader.set_mark();
+                match reader.eat() {
                     // The good ending.
-                    Some((n, '"')) => {
-                        len = n + 1;
+                    Some('"') => {
                         kind = TokenKind::String;
                         break;
                     }
                     // The bad endings.
-                    Some((n, '\r' | '\n')) => {
-                        len = n;
+                    Some('\r' | '\n') | None => {
+                        reader.rollback();
                         kind = TokenKind::StringUnclosed;
                         break;
                     }
-                    None => {
-                        len = suffix.len();
-                        kind = TokenKind::StringUnclosed;
-                        break;
+                    Some('\\') => {
+                        if reader.eat() == Some('\r') {
+                            reader.try_eat("\n");
+                        }
                     }
-                    Some((_, '\\')) => match chars.next() {
-                        None => {
-                            len = suffix.len();
-                            kind = TokenKind::StringUnclosed;
-                            break;
-                        }
-                        // As long as we have a character, skip it.
-                        // Newlines need special treatment, since \ CR LF
-                        // should skip both the CR and LF.
-                        Some((_, '\r')) => {
-                            // Peek at the next item, step over it if LF.
-                            if let Some((_, '\n')) = chars.clone().next() {
-                                chars.next();
-                            }
-                        }
-                        _ => (),
-                    },
                     _ => (),
                 }
             }
         } else if mode == LexMode::Table
-            && suffix.starts_with(
-                &[
-                    '0', '1', 'x', 'X', 'b', 'B', 'r', 'R', 'f', 'F', 'p', 'P', 'n', 'N',
-                ][..],
-            )
+            && reader
+                .eat_if(|c| {
+                    matches!(
+                        c,
+                        '0' | '1'
+                            | 'x'
+                            | 'X'
+                            | 'b'
+                            | 'B'
+                            | 'r'
+                            | 'R'
+                            | 'f'
+                            | 'F'
+                            | 'p'
+                            | 'P'
+                            | 'n'
+                            | 'N'
+                    )
+                })
+                .is_some()
         {
             kind = TokenKind::TableItem;
-            len = 1;
-        } else if suffix.starts_with(|c: char| c.is_whitespace() && !matches!(c, '\r' | '\n')) {
+        } else if !reader
+            .eat_while(|c| c.is_whitespace() && !matches!(c, '\r' | '\n'))
+            .is_empty()
+        {
             kind = TokenKind::Whitespace;
-            len = eat_chars(suffix, 0, |c| {
-                c.is_whitespace() && !matches!(c, '\r' | '\n')
-            });
-        } else if mode.is_based() && suffix.starts_with(|c: char| is_based_digit(c, mode)) {
+        } else if mode.is_based() && reader.eat_if(|c| is_based_digit(c, mode)).is_some() {
             kind = match mode {
                 LexMode::BaseBin => TokenKind::DigitsBin,
                 LexMode::BaseOct => TokenKind::DigitsOct,
@@ -176,67 +151,60 @@ impl<'sm> Lexer<'sm> {
                 LexMode::BaseHex => TokenKind::DigitsHex,
                 _ => unreachable!(),
             };
-            len = eat_chars(suffix, 0, |c| is_based_digit(c, mode) || c == '_');
-        } else if mode == LexMode::BaseDec && suffix.starts_with(is_xz) {
+            reader.eat_while(|c| is_based_digit(c, mode) || c == '_');
+        } else if mode == LexMode::BaseDec && reader.eat_if(is_xz).is_some() {
             // Special case: for decimal base, x/z must be the only digit
             // if present, though it may be followed by arbitrary number
             // of _.
             kind = TokenKind::DigitsDec;
-            len = eat_chars(suffix, 1, |c| c == '_');
-        } else if suffix.starts_with(is_id_start) {
+            reader.eat_while(|c| c == '_');
+        } else if reader.eat_if(is_id_start).is_some() {
             kind = TokenKind::SimpleId;
-            len = eat_chars(suffix, 0, is_id_cont);
-        } else if suffix.starts_with(|c: char| c.is_ascii_digit()) && kind != TokenKind::OneStep {
+            reader.eat_while(is_id_cont);
+        } else if kind != TokenKind::OneStep && reader.eat_if(|c| c.is_ascii_digit()).is_some() {
             kind = TokenKind::DecimalNumber;
-            len = eat_chars(suffix, 0, |c| c.is_ascii_digit() || c == '_');
-            if char_at(suffix, len) == Some('.')
-                && char_at(suffix, len + 1)
-                    .filter(|c| c.is_ascii_digit())
-                    .is_some()
-            {
-                len = eat_chars(suffix, len + 1, |c| c.is_ascii_digit() || c == '_');
+            reader.eat_while(|c| c.is_ascii_digit() || c == '_');
+            reader.set_mark();
+            if reader.try_eat(".") && reader.eat_if(|c| c.is_ascii_digit()).is_some() {
+                reader.eat_while(|c| c.is_ascii_digit() || c == '_');
                 kind = TokenKind::RealNumber;
+            } else {
+                reader.rollback();
             }
-            match char_at(suffix, len) {
+            reader.set_mark();
+            match reader.eat() {
                 Some('e' | 'E') => {
-                    let mut start_fract = len + 1;
-                    if matches!(char_at(suffix, start_fract), Some('+' | '-')) {
-                        start_fract = len + 2;
-                    }
-                    if char_at(suffix, start_fract)
-                        .filter(|c| c.is_ascii_digit())
-                        .is_some()
-                    {
-                        len = eat_chars(suffix, start_fract, |c| c.is_ascii_digit() || c == '_');
+                    reader.eat_if(|c| matches!(c, '+' | '-'));
+                    if reader.eat_if(|c| c.is_ascii_digit()).is_some() {
+                        reader.eat_while(|c| c.is_ascii_digit() || c == '_');
                         kind = TokenKind::RealNumber;
+                    } else {
+                        reader.rollback();
                     }
                 }
                 Some('s') => {
                     kind = TokenKind::Time;
-                    len += 1;
                 }
                 // Either a Verilog-AMS scale factor, or a time unit if followed by s.
-                Some('m' | 'u' | 'n' | 'p' | 'f') => match char_at(suffix, len + 1) {
-                    Some('s') => {
+                Some('m' | 'u' | 'n' | 'p' | 'f') => {
+                    if reader.try_eat("s") {
                         kind = TokenKind::Time;
-                        len += 2;
-                    }
-                    _ => {
+                    } else {
                         kind = TokenKind::RealNumber;
-                        len += 1;
                     }
-                },
+                }
                 // Always a Verilog-AMS scale factor.
                 Some('T' | 'G' | 'M' | 'K' | 'k' | 'a') => {
                     kind = TokenKind::RealNumber;
-                    len += 1;
                 }
-                _ => (),
+                _ => reader.rollback(),
             }
+        } else {
+            reader.advance(len);
         }
         Token {
             kind,
-            src: self.cursor.range_len(len),
+            src: reader.range_from(self.cursor),
         }
     }
 
