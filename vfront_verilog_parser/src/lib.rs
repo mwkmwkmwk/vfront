@@ -1,3 +1,4 @@
+pub mod diags;
 pub mod lang;
 pub mod lex;
 pub mod literal;

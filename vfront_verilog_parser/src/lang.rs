@@ -1,3 +1,8 @@
+use vfront_basics::diag::DiagSystem;
+use vfront_basics::source::SourceManager;
+
+use std::fmt;
+
 /// Selects the recognized language.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum LangMode {
@@ -34,6 +39,7 @@ pub enum LangMode {
 }
 
 impl LangMode {
+    /// Return true if this is a variant of Verilog-AMS (but *not* Verilog-A).
     pub fn is_vams(self) -> bool {
         matches!(
             self,
@@ -44,5 +50,32 @@ impl LangMode {
                 | LangMode::VerilogAMS24
                 | LangMode::SystemVerilogAMS
         )
+    }
+    /// Return true if this is a variant of SystemVerilog.
+    pub fn is_sv(self) -> bool {
+        matches!(
+            self,
+            LangMode::SystemVerilog2005
+                | LangMode::SystemVerilog2009
+                | LangMode::SystemVerilog2012
+                | LangMode::SystemVerilog2017
+                | LangMode::SystemVerilogAMS
+        )
+    }
+}
+
+/// A structure with things we need to keep around throughout the whole flow.
+#[derive(Copy, Clone)]
+pub struct LangContext<'a> {
+    pub source: &'a SourceManager,
+    pub diags: &'a DiagSystem<'a>,
+    pub lang: LangMode,
+}
+
+impl fmt::Debug for LangContext<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LangContext")
+            .field("lang", &self.lang)
+            .finish()
     }
 }

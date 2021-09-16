@@ -10,12 +10,15 @@ pub struct Lexer<'sm> {
 fn is_id_cont(c: char) -> bool {
     c.is_alphanumeric() || c == '$' || c == '_'
 }
+
 fn is_id_start(c: char) -> bool {
     c.is_alphabetic() || c == '_'
 }
+
 fn is_xz(c: char) -> bool {
     matches!(c, 'x' | 'X' | 'z' | 'Z' | '?')
 }
+
 fn is_based_digit(c: char, mode: LexMode) -> bool {
     match mode {
         LexMode::BaseBin => matches!(c, '0' | '1') || is_xz(c),
@@ -25,6 +28,13 @@ fn is_based_digit(c: char, mode: LexMode) -> bool {
         LexMode::BaseHex => c.is_ascii_hexdigit() || is_xz(c),
         _ => false,
     }
+}
+
+fn is_table_item(c: char) -> bool {
+    matches!(
+        c,
+        '0' | '1' | 'x' | 'X' | 'b' | 'B' | 'r' | 'R' | 'f' | 'F' | 'p' | 'P' | 'n' | 'N'
+    )
 }
 
 impl LexMode {
@@ -115,28 +125,7 @@ impl<'sm> Lexer<'sm> {
                     _ => (),
                 }
             }
-        } else if mode == LexMode::Table
-            && reader
-                .eat_if(|c| {
-                    matches!(
-                        c,
-                        '0' | '1'
-                            | 'x'
-                            | 'X'
-                            | 'b'
-                            | 'B'
-                            | 'r'
-                            | 'R'
-                            | 'f'
-                            | 'F'
-                            | 'p'
-                            | 'P'
-                            | 'n'
-                            | 'N'
-                    )
-                })
-                .is_some()
-        {
+        } else if mode == LexMode::Table && reader.eat_if(is_table_item).is_some() {
             kind = TokenKind::TableItem;
         } else if !reader
             .eat_while(|c| c.is_whitespace() && !matches!(c, '\r' | '\n'))
