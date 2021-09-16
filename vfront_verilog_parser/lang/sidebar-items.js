@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["LangMode","Selects the recognized language."]]});
+initSidebarItems({"enum":[["LangMode","Selects the recognized language."]],"struct":[["LangContext","A structure with things we need to keep around throughout the whole flow."]]});

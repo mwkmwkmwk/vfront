@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["lang",""],["lex",""],["literal","Functions for handling Verilog literals."],["token",""]]});
+initSidebarItems({"mod":[["diags",""],["lang",""],["lex",""],["literal","Functions for handling Verilog literals."],["token",""]]});

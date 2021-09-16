@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["make_string_literal","Makes a string literal with the given contents."]]});
+initSidebarItems({"fn":[["make_string_literal","Makes a string literal with the given contents."],["parse_string","Parses a string literal into a byte array.  On error, returns None and emits the appropriate diagnostics."]]});
