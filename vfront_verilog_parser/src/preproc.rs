@@ -53,7 +53,7 @@ impl<'a> PreprocState<'a> {
     /// Creates a predefined simple macro.  Note that macros created by this function are
     /// special, and should only be used to implement language-defined macros: they are immune
     /// to being undefined and redefined under any circumstances.  For normal macros defined
-    /// through the command line, use [TODO].
+    /// through the command line, use <TODO>.
     pub fn predefine_macro(&mut self, name: impl Into<Box<str>>, text: impl Into<Box<str>>) {
         match self.defines.entry(name.into()) {
             Entry::Occupied(_) => panic!("predefined macro already defined"),
@@ -154,7 +154,7 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
             .emit();
     }
 
-    /// A simpler version of [peek] that only skips whitespace and doesn't do any more complex
+    /// A simpler version of [`Preproc::peek`] that only skips whitespace and doesn't do any more complex
     /// processing, to be used for parsing preprocessor directives.
     fn peek_preproc(&mut self, mode: LexMode) -> Token<'sm> {
         // TODO: this is too dumb, we need at least macro expansion here (for `include argument).
@@ -610,7 +610,7 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
         res
     }
 
-    /// Consumes the last peeked token.  Should only be called after a [peek].
+    /// Consumes the last peeked token.  Should only be called after a [`Preproc::peek`].
     pub fn consume(&mut self) {
         self.lexer.step(self.lookahead.unwrap().0);
         self.lookahead = None;
