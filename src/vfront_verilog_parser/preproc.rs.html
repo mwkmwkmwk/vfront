@@ -679,7 +679,7 @@
     <span class="doccomment">/// Creates a predefined simple macro.  Note that macros created by this function are</span>
     <span class="doccomment">/// special, and should only be used to implement language-defined macros: they are immune</span>
     <span class="doccomment">/// to being undefined and redefined under any circumstances.  For normal macros defined</span>
-    <span class="doccomment">/// through the command line, use [TODO].</span>
+    <span class="doccomment">/// through the command line, use &lt;TODO&gt;.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">predefine_macro</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">defines</span>.<span class="ident">entry</span>(<span class="ident">name</span>.<span class="ident">into</span>()) {
             <span class="ident">Entry::Occupied</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;predefined macro already defined&quot;</span>),
@@ -780,7 +780,7 @@
             .<span class="ident">emit</span>();
     }
 
-    <span class="doccomment">/// A simpler version of [peek] that only skips whitespace and doesn&#39;t do any more complex</span>
+    <span class="doccomment">/// A simpler version of [`Preproc::peek`] that only skips whitespace and doesn&#39;t do any more complex</span>
     <span class="doccomment">/// processing, to be used for parsing preprocessor directives.</span>
     <span class="kw">fn</span> <span class="ident">peek_preproc</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">mode</span>: <span class="ident">LexMode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;sm</span><span class="op">&gt;</span> {
         <span class="comment">// TODO: this is too dumb, we need at least macro expansion here (for `include argument).</span>
@@ -1236,7 +1236,7 @@
         <span class="ident">res</span>
     }
 
-    <span class="doccomment">/// Consumes the last peeked token.  Should only be called after a [peek].</span>
+    <span class="doccomment">/// Consumes the last peeked token.  Should only be called after a [`Preproc::peek`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">consume</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">lexer</span>.<span class="ident">step</span>(<span class="self">self</span>.<span class="ident">lookahead</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
         <span class="self">self</span>.<span class="ident">lookahead</span> <span class="op">=</span> <span class="prelude-val">None</span>;
