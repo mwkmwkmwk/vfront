@@ -551,6 +551,15 @@
 <span id="551">551</span>
 <span id="552">552</span>
 <span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
 </pre><pre class="rust"><code><span class="doccomment">//! The vfront diagnostic system.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The system has several major moving parts:</span>
@@ -942,6 +951,15 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">help</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">help</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">help</span>.<span class="ident">is_none</span>());
         <span class="self">self</span>.<span class="ident">help</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">help</span>.<span class="ident">into</span>());
+        <span class="self">self</span>
+    }
+
+    <span class="doccomment">/// Sets the help message for the diagnostic, but only if the given condition is true.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">help_if</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cond</span>: <span class="ident">bool</span>, <span class="ident">help</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">cond</span> {
+            <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">help</span>.<span class="ident">is_none</span>());
+            <span class="self">self</span>.<span class="ident">help</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">help</span>.<span class="ident">into</span>());
+        }
         <span class="self">self</span>
     }
 
