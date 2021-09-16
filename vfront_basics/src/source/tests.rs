@@ -219,3 +219,86 @@ fn test_line_override() {
         }
     }
 }
+
+#[test]
+fn test_reader() {
+    let sm = SourceManager::new();
+    let chunk = sm.add_file("meh.txt", "0123456789\u{1234}0123456789");
+    let mut reader = chunk.loc(3).reader();
+    assert_eq!(reader.suffix(), "3456789\u{1234}0123456789");
+    assert_eq!(reader.cursor(), chunk.loc(3));
+    assert_eq!(reader.end(), chunk.loc(23));
+    assert_eq!(reader.bookmark(), chunk.loc(3));
+    assert_eq!(reader.peek(), (Some('3'), chunk.loc(4)));
+    assert_eq!(reader.peek(), (Some('3'), chunk.loc(4)));
+    assert_eq!(reader.eat(), Some('3'));
+    assert_eq!(reader.eat(), Some('4'));
+    assert_eq!(reader.peek(), (Some('5'), chunk.loc(6)));
+    assert_eq!(reader.cursor(), chunk.loc(5));
+    assert_eq!(reader.bookmark(), chunk.loc(3));
+    assert_eq!(reader.suffix(), "56789\u{1234}0123456789");
+    assert_eq!(reader.range(), chunk.range(3..5));
+    assert_eq!(reader.range_from(chunk.loc(4)), chunk.range(4..5));
+    reader.set_mark();
+    assert_eq!(reader.cursor(), chunk.loc(5));
+    assert_eq!(reader.bookmark(), chunk.loc(5));
+    assert_eq!(reader.eat_if(|c| c < '8'), Some('5'));
+    assert_eq!(reader.eat_if(|c| c < '8'), Some('6'));
+    assert_eq!(reader.eat_if(|c| c < '8'), Some('7'));
+    assert_eq!(reader.eat_if(|c| c < '8'), None);
+    assert_eq!(reader.cursor(), chunk.loc(8));
+    reader.rollback();
+    assert_eq!(reader.cursor(), chunk.loc(5));
+    assert_eq!(reader.bookmark(), chunk.loc(5));
+    assert_eq!(reader.eat_while(|c| c < '8'), "567");
+    assert_eq!(reader.cursor(), chunk.loc(8));
+    assert_eq!(reader.eat_while(|c| c < '8'), "");
+    assert_eq!(reader.cursor(), chunk.loc(8));
+    reader.move_to(chunk.loc(5));
+    assert_eq!(reader.eat_if_map(|c| c.to_digit(8)), Some(5));
+    assert_eq!(reader.eat_if_map(|c| c.to_digit(8)), Some(6));
+    assert_eq!(reader.eat_if_map(|c| c.to_digit(8)), Some(7));
+    assert_eq!(reader.eat_if_map(|c| c.to_digit(8)), None);
+    assert_eq!(reader.eat_if_map(|c| c.to_digit(8)), None);
+    assert_eq!(reader.cursor(), chunk.loc(8));
+    reader.rollback();
+    assert_eq!(reader.cursor(), chunk.loc(5));
+    reader.advance(3);
+    assert_eq!(reader.cursor(), chunk.loc(8));
+    assert!(!reader.try_eat("8a"));
+    assert_eq!(reader.cursor(), chunk.loc(8));
+    assert!(reader.try_eat("89"));
+    assert_eq!(reader.cursor(), chunk.loc(10));
+    assert_eq!(reader.peek(), (Some('\u{1234}'), chunk.loc(13)));
+    assert_eq!(reader.eat(), Some('\u{1234}'));
+    assert!(!reader.is_empty());
+    assert_eq!(reader.eat_while(|c| c < 'a'), "0123456789");
+    assert!(reader.is_empty());
+    assert_eq!(reader.cursor(), chunk.loc(23));
+    assert_eq!(reader.peek(), (None, chunk.loc(23)));
+    assert_eq!(reader.eat(), None);
+    assert_eq!(reader.eat_if(|c| c < '9'), None);
+    assert_eq!(reader.eat_while(|c| c < 'a'), "");
+    reader = chunk.range(3..6).reader();
+    assert_eq!(reader.cursor(), chunk.loc(3));
+    assert_eq!(reader.end(), chunk.loc(6));
+    assert_eq!(reader.bookmark(), chunk.loc(3));
+    assert_eq!(reader.suffix(), "345");
+    assert_eq!(reader.peek(), (Some('3'), chunk.loc(4)));
+    assert_eq!(reader.eat(), Some('3'));
+    assert_eq!(reader.eat(), Some('4'));
+    assert_eq!(reader.eat(), Some('5'));
+    assert_eq!(reader.eat(), None);
+    assert_eq!(reader.eat_if(|_| true), None);
+    assert_eq!(reader.eat_if_map(|c| Some(c)), None);
+    assert_eq!(reader.eat_while(|_| true), "");
+    assert_eq!(reader.try_eat("67"), false);
+    assert_eq!(reader.peek(), (None, chunk.loc(6)));
+    assert_eq!(reader.cursor(), chunk.loc(6));
+    reader.rollback();
+    assert_eq!(reader.eat_while(|_| true), "345");
+    reader.rollback();
+    assert_eq!(reader.try_eat("345"), true);
+    reader.rollback();
+    assert_eq!(reader.try_eat("3456"), false);
+}

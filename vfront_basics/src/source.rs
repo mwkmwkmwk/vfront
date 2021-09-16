@@ -43,7 +43,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
 use std::num::NonZeroU32;
-use std::ops::{Bound, Deref, RangeBounds};
+use std::ops::{Add, AddAssign, Bound, Deref, RangeBounds};
 
 /// A contiguous chunk of source code, belonging to a [`SourceManager`].
 /// Can be a source file or a macro expansion.
@@ -205,6 +205,26 @@ pub struct SourceOverrideLineInfo<'a> {
     pub file_name: &'a str,
     /// The overriden line number.
     pub line_num: usize,
+}
+
+/// A helper for reading from a source chunk character by character.
+///
+/// This maintains three pointers into a chunk:
+///
+/// - The cursor: points at the next character to be read.
+/// - The end: points at a "stop point" past which the cursor cannot advance.
+/// - The bookmark: points at an arbitrary "start point" at or before the cursor, used for
+///   rollback and range construction.  Initially points at the same place as the cursor.
+///
+/// A reader can be constructed (by `Reader::from`) from a [`SourceRef`] (sets the cursor to
+/// given position, sets the end to the end of the chunk) or a [`SourceRangeRef`] (sets the
+/// cursor to the start of the range, sets the end to the end of the range).
+#[derive(Debug, Clone)]
+pub struct SourceReader<'a> {
+    chunk: &'a SourceChunk,
+    pos_cursor: usize,
+    pos_bookmark: usize,
+    pos_end: usize,
 }
 
 impl SourceChunk {
@@ -667,6 +687,34 @@ impl<'a> SourceRef<'a> {
             vpos: NonZeroU32::new(self.chunk.start_vpos.get() + (self.pos as u32)).unwrap(),
         }
     }
+
+    /// Returns a [`SourceReader`] covering the range from this position to the end of the chunk.
+    pub fn reader(&self) -> SourceReader<'a> {
+        SourceReader {
+            chunk: self.chunk,
+            pos_cursor: self.pos,
+            pos_bookmark: self.pos,
+            pos_end: self.chunk.len(),
+        }
+    }
+}
+
+impl<'a> Add<usize> for SourceRef<'a> {
+    type Output = Self;
+    fn add(self, delta: usize) -> Self {
+        assert!(self.pos + delta <= self.chunk.len());
+        SourceRef {
+            chunk: self.chunk,
+            pos: self.pos + delta,
+        }
+    }
+}
+
+impl<'a> AddAssign<usize> for SourceRef<'a> {
+    fn add_assign(&mut self, delta: usize) {
+        assert!(self.pos + delta <= self.chunk.len());
+        self.pos += delta;
+    }
 }
 
 impl<'a> SourceRangeRef<'a> {
@@ -713,19 +761,174 @@ impl<'a> SourceRangeRef<'a> {
             end: self.end().into(),
         }
     }
+
+    /// Returns the underlying string slice.
+    pub fn str(&self) -> &'a str {
+        &self.chunk.text[self.pos_start..self.pos_end]
+    }
+
+    /// Returns a [`SourceReader`] covering this range.
+    pub fn reader(&self) -> SourceReader<'a> {
+        SourceReader {
+            chunk: self.chunk,
+            pos_cursor: self.pos_start,
+            pos_bookmark: self.pos_start,
+            pos_end: self.pos_end,
+        }
+    }
 }
 
 impl Deref for SourceRangeRef<'_> {
     type Target = str;
 
     fn deref(&self) -> &str {
-        &self.chunk.text[self.pos_start..self.pos_end]
+        self.str()
     }
 }
 
 impl SourceLineInfo<'_> {
     fn get_column_num(&self) -> usize {
         self.line_offset + 1
+    }
+}
+
+impl<'a> SourceReader<'a> {
+    /// Returns the chunk slice between the cursor and the end.
+    pub fn suffix(&self) -> &'a str {
+        &self.chunk.text[self.pos_cursor..self.pos_end]
+    }
+
+    /// Moves the cursor to the given position.
+    pub fn move_to(&mut self, loc: SourceRef<'a>) {
+        assert_eq!(self.chunk, loc.chunk);
+        self.pos_cursor = loc.pos;
+        assert!(self.pos_cursor <= self.pos_end);
+    }
+
+    /// Returns the current cursor position.
+    pub fn cursor(&self) -> SourceRef<'a> {
+        self.chunk.loc(self.pos_cursor)
+    }
+
+    /// Returns the end position of this reader.
+    pub fn end(&self) -> SourceRef<'a> {
+        self.chunk.loc(self.pos_end)
+    }
+
+    /// Returns the current bookmark position.
+    pub fn bookmark(&self) -> SourceRef<'a> {
+        self.chunk.loc(self.pos_bookmark)
+    }
+
+    /// Moves the bookmark position to the current cursor position.
+    pub fn set_mark(&mut self) {
+        self.pos_bookmark = self.pos_cursor;
+    }
+
+    /// Moves the cursor position forwards by the given number of bytes.
+    pub fn advance(&mut self, num: usize) {
+        self.pos_cursor += num;
+        assert!(self.pos_cursor <= self.pos_end);
+    }
+
+    /// Moves the cursor position back to the current bookmark position (effectively undoing
+    /// all eat calls since the last [`SourceReader::set_mark`] call.
+    pub fn rollback(&mut self) {
+        self.pos_cursor = self.pos_bookmark;
+    }
+
+    /// Returns a [`SourceRangeRef`] starting from the current bookmark position and ending
+    /// at the current cursor position.
+    pub fn range(&self) -> SourceRangeRef<'a> {
+        self.chunk.range(self.pos_bookmark..self.pos_cursor)
+    }
+
+    /// Returns a [`SourceRangeRef`] spanning from the given position to the current cursor
+    /// position.
+    pub fn range_from(&self, start: SourceRef<'a>) -> SourceRangeRef<'a> {
+        assert_eq!(self.chunk, start.chunk);
+        self.chunk.range(start.pos..self.pos_cursor)
+    }
+
+    /// Returns the character at the cursor, or None if the cursor is at the end position.
+    /// Also returns a [`SourceRef`] that can be passed to [`SourceReader::move_to`] to consume
+    /// the returned character.
+    pub fn peek(&self) -> (Option<char>, SourceRef<'a>) {
+        match self.suffix().chars().next() {
+            Some(c) => (Some(c), self.chunk.loc(self.pos_cursor + c.len_utf8())),
+            None => (None, self.cursor()),
+        }
+    }
+
+    /// Returns the character at the cursor and consumes it, or returns None if the cursor
+    /// is at the end position.
+    pub fn eat(&mut self) -> Option<char> {
+        self.eat_if(|_| true)
+    }
+
+    /// Checks if the character at the cursor satisfies the given predicate and, if so, consumes
+    /// and returns it.  If the cursor is at the end position or the character doesn't satisfy
+    /// the predicate, returns None and doesn't consume anything.
+    pub fn eat_if<P>(&mut self, pred: P) -> Option<char>
+    where
+        P: FnOnce(char) -> bool,
+    {
+        match self.suffix().chars().next().filter(|c| pred(*c)) {
+            Some(c) => {
+                self.pos_cursor += c.len_utf8();
+                Some(c)
+            }
+            None => None,
+        }
+    }
+
+    /// Takes the character at the cursor, runs a given function returning an [`Option`] on it,
+    /// returns its result.  If the function returns a value other than [`None`], consumes
+    /// the character.
+    pub fn eat_if_map<F, T>(&mut self, f: F) -> Option<T>
+    where
+        F: FnOnce(char) -> Option<T>,
+    {
+        match self.suffix().chars().next() {
+            Some(c) => match f(c) {
+                Some(res) => {
+                    self.pos_cursor += c.len_utf8();
+                    Some(res)
+                }
+                None => None,
+            },
+            None => None,
+        }
+    }
+
+    /// Consumes the characters at the cursor, stopping at the end position or when a character
+    /// is found that doesn't satisfy the given predicate.  Returns a string slice of all
+    /// consumed characters.
+    pub fn eat_while<P>(&mut self, mut pred: P) -> &'a str
+    where
+        P: FnMut(char) -> bool,
+    {
+        let suffix = self.suffix();
+        let len = suffix.find(|x| !pred(x)).unwrap_or(suffix.len());
+        let res = &suffix[..len];
+        self.pos_cursor += len;
+        res
+    }
+
+    /// If there is an occurence of the given string directly at the cursor, consumes it and
+    /// returns true.  Otherwise, does nothing and returns false.
+    pub fn try_eat(&mut self, s: &str) -> bool {
+        if self.suffix().starts_with(s) {
+            self.pos_cursor += s.len();
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Returns true iff the cursor position is at the end position.
+    pub fn is_empty(&self) -> bool {
+        self.pos_cursor == self.pos_end
     }
 }
 
