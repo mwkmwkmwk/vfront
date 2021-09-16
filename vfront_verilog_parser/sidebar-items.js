@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["diags",""],["lang",""],["lex",""],["literal","Functions for handling Verilog literals."],["token",""]]});
+initSidebarItems({"mod":[["diags",""],["include","The machinery providing include files to the Verilog preprocessor."],["lang",""],["lex",""],["literal","Functions for handling Verilog literals."],["preproc",""],["token",""]]});

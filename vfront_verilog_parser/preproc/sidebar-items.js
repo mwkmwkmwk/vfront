@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Preproc","A running preprocessor."],["PreprocState","Preprocessor state that should be preserved across source files."]]});

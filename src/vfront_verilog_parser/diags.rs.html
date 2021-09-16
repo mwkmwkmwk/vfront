@@ -9,6 +9,18 @@
 <span id="9"> 9</span>
 <span id="10">10</span>
 <span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">vfront_basics::diag_types</span>;
 
 <span class="macro">diag_types!</span>(
@@ -19,6 +31,18 @@
     <span class="ident">error</span> <span class="ident">err_octal_escape_overflow</span> <span class="op">=</span> <span class="string">&quot;An octal string escape sequence was found with a value larget than `\\0377`.&quot;</span>,
     <span class="ident">error</span> <span class="ident">err_hex_escape_missing_digits</span> <span class="op">=</span> <span class="string">&quot;A `\\x` string escape sequence was found, but wasn&#39;t followed by hex digits.&quot;</span>,
     <span class="ident">warning</span> <span class="ident">systemverilog_string_escape</span> <span class="op">=</span> <span class="string">&quot;A SystemVerilog-only string escape was found in non-SystemVerilog mode.&quot;</span>,
+    <span class="comment">// Preprocessor.</span>
+    <span class="ident">error</span> <span class="ident">err_unclosed_block_comment</span> <span class="op">=</span> <span class="string">&quot;A block comment was found without closing `*/`.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_unclosed_ifdef</span> <span class="op">=</span> <span class="string">&quot;An `ifdef or `ifndef was found without matching `endif.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_unmatched_dir_endif</span> <span class="op">=</span> <span class="string">&quot;An `endif was found without matching `ifdef or `ifndef.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_unmatched_dir_else</span> <span class="op">=</span> <span class="string">&quot;An `else or `elsif was found without matching `ifdef or `ifndef.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_dir_ifdef_double_else</span> <span class="op">=</span> <span class="string">&quot;An `else or `elsif for an `ifdef that already had an `else.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_macro_backtick</span> <span class="op">=</span> <span class="string">&quot;A compiler directive was passed a macro name with extra backtick.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_macro_system_id</span> <span class="op">=</span> <span class="string">&quot;A system identifier (eg. `$abc`) was used as macro name.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_macro_escaped_id</span> <span class="op">=</span> <span class="string">&quot;An escaped identifier (eg. `\\abc `) was used as macro name.&quot;</span>,
+    <span class="ident">error</span> <span class="ident">err_expected_macro_name</span> <span class="op">=</span> <span class="string">&quot;A macro name was expected by a directive, but not found.&quot;</span>,
+    <span class="ident">warning</span> <span class="ident">undef_undefined</span> <span class="op">=</span> <span class="string">&quot;An `undef directive tried to undefine an undefined macro.&quot;</span>,
+    <span class="ident">warning</span> <span class="ident">undef_predefined</span> <span class="op">=</span> <span class="string">&quot;An `undef directive tried to undefine a predefined standard macro.&quot;</span>,
 );
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="vfront_verilog_parser" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
