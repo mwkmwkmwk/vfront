@@ -197,11 +197,13 @@ fn test_builder() {
         .begin(test_comp::err, "Oops 3.")
         .primary(r1, "Primary here")
         .secondary(r2, "Secondary here")
+        .help_if(false, "No help")
         .emit();
     diags
         .begin(test_comp::w2, format!("Oops {}.", 4))
         .primaries([(r1, "A"), (r2, "B")].iter().copied())
         .secondaries([(r3, "C"), (r4, "D"), (r5, "E")].iter().copied())
+        .help_if(true, "Some help")
         .emit();
     let diags: Vec<_> = sink.into();
     assert_eq!(diags.len(), 4);
@@ -212,7 +214,7 @@ fn test_builder() {
     assert_eq!(diags[0].help, None);
     assert_eq!(diags[1].help, Some("Help".to_string()));
     assert_eq!(diags[2].help, None);
-    assert_eq!(diags[3].help, None);
+    assert_eq!(diags[3].help, Some("Some help".to_string()));
     assert_eq!(diags[0].spans.len(), 0);
     assert_eq!(diags[1].spans.len(), 0);
     assert_eq!(diags[2].spans.len(), 2);

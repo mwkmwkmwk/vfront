@@ -392,6 +392,15 @@ impl<'a> DiagBuilder<'a> {
         self
     }
 
+    /// Sets the help message for the diagnostic, but only if the given condition is true.
+    pub fn help_if(mut self, cond: bool, help: impl Into<String>) -> Self {
+        if cond {
+            assert!(self.help.is_none());
+            self.help = Some(help.into());
+        }
+        self
+    }
+
     /// Adds a primary code span to the diagnostic.
     pub fn primary(mut self, range: impl Into<SourceRange>, msg: impl Into<String>) -> Self {
         self.spans.push(DiagSpan {
