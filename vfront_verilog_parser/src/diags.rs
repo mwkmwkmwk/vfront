@@ -8,6 +8,7 @@ diag_types!(
     error err_octal_escape_overflow = "An octal string escape sequence was found with a value larget than `\\0377`.",
     error err_hex_escape_missing_digits = "A `\\x` string escape sequence was found, but wasn't followed by hex digits.",
     warning systemverilog_string_escape = "A SystemVerilog-only string escape was found in non-SystemVerilog mode.",
+    warning ams_si_suffix = "A SI suffix was found on a real number in non-Verilog-AMS mode.",
     // Preprocessor.
     error err_unclosed_block_comment = "A block comment was found without closing `*/`.",
     error err_unclosed_ifdef = "An `ifdef or `ifndef was found without matching `endif.",

@@ -2,9 +2,91 @@
 
 use crate::diags;
 use crate::lang::LangContext;
+use crate::lang::LangMode;
 use std::convert::TryFrom;
+use std::fmt::Write;
 use std::ops::{Bound, RangeBounds};
 use vfront_basics::source::SourceRangeRef;
+
+/// Returns the decimal exponent corresponding to a given SI suffix.
+fn get_si_exp(c: char) -> Option<i32> {
+    match c {
+        'a' => Some(-18),
+        'f' => Some(-15),
+        'p' => Some(-12),
+        'n' => Some(-9),
+        'u' => Some(-6),
+        'm' => Some(-3),
+        'k' | 'K' => Some(3),
+        'M' => Some(6),
+        'G' => Some(9),
+        'T' => Some(12),
+        _ => None,
+    }
+}
+
+/// Validates a real number literal, emits any appropriate diagnostics.  The input must be
+/// a valid RealNumber token recognized by the lexer.
+pub fn validate_real(ctx: LangContext<'_>, token: SourceRangeRef<'_>) {
+    if !ctx.lang.is_analog() || ctx.lang == LangMode::VerilogA10 {
+        if let Some(c) = token.chars().last() {
+            let pos = token.len() - c.len_utf8();
+            let range = token.range(pos..);
+            if ctx.lang == LangMode::VerilogA10 {
+                // If this is Verilog-A 1.0, SI suffixes are acceptable, except for lowercase k.
+                if c == 'k' {
+                    ctx.diags.begin(diags::ams_si_suffix, format!("the `{}` suffix for real literals is only available in Verilog-AMS", range.str()))
+                        .primary(range, "Verilog-AMS-only SI suffix")
+                        .help(format!("replace this with uppercase `K`: `{}K`", &token[..pos]))
+                        .emit();
+                }
+            } else {
+                // Otherwise, this is plain Verilog / SystemVerilog, and no SI suffixes are
+                // acceptable.
+                if let Some(exp) = get_si_exp(c) {
+                    ctx.diags.begin(diags::ams_si_suffix, format!("the `{}` suffix for real literals is only available in Verilog-AMS", range.str()))
+                        .primary(range, "Verilog-AMS-only SI suffix")
+                        .help(format!("replace this with an exponent: `{}e{}`", &token[..pos], exp))
+                        .emit();
+                }
+            }
+        }
+    }
+}
+
+/// Converts a real number literal to a string that can be parsed by the Rust float parser:
+/// strips `_`, converts SI suffixes to exponents.
+fn clean_real(token: SourceRangeRef<'_>) -> String {
+    let mut res = String::new();
+    for c in token.chars() {
+        if c == '_' {
+            continue;
+        }
+        if let Some(exp) = get_si_exp(c) {
+            write!(res, "e{}", exp).unwrap();
+        } else {
+            res.push(c);
+        }
+    }
+    res
+}
+
+/// Parses a real number literal into a real (aka f64).
+pub fn parse_real(token: SourceRangeRef<'_>) -> f64 {
+    clean_real(token).parse().unwrap()
+}
+
+/// Parses a real number literal into a shortreal (aka f32).
+pub fn parse_shortreal(token: SourceRangeRef<'_>) -> f32 {
+    clean_real(token).parse().unwrap()
+}
+
+/// Parses an identifier literal into the actual identifier string.  This simply strips leading
+/// `\` from escaped identifiers, while returning simple identifiers unchanged.
+pub fn parse_id(token: SourceRangeRef<'_>) -> &str {
+    let s = token.str();
+    s.strip_prefix('\\').unwrap_or(s)
+}
 
 /// Parses a string literal into a byte array.  On error, returns None and
 /// emits the appropriate diagnostics.

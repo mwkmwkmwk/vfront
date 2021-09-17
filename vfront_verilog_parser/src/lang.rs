@@ -51,6 +51,17 @@ impl LangMode {
                 | LangMode::SystemVerilogAMS
         )
     }
+
+    /// Return true if this is a variant of Verilog-A (ie there is no digital logic support).
+    pub fn is_analog_only(self) -> bool {
+        self == LangMode::VerilogA10
+    }
+
+    /// Return true if this is a variant of Verilog-A or Verilog-AMS.
+    pub fn is_analog(self) -> bool {
+        self.is_vams() || self.is_analog_only()
+    }
+
     /// Return true if this is a variant of SystemVerilog.
     pub fn is_sv(self) -> bool {
         matches!(

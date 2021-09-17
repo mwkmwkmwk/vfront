@@ -17,6 +17,64 @@ fn test_make_string_literal() {
     assert_eq!(make_string_literal(b""), r#""""#);
 }
 
+#[test]
+fn test_id() {
+    fn test(s: &str, id: &str) {
+        let sm = SourceManager::new();
+        let chunk = sm.add_file("test", s);
+        assert_eq!(parse_id(chunk.range(..)), id);
+    }
+    test("abcd", "abcd");
+    test("\\!@#$%", "!@#$%");
+    test("\\\\!@#$%", "\\!@#$%");
+}
+
+macro_rules! real_tests {
+    () => {
+        test("123.0", 123.0);
+        test("123e0", 123.0);
+        test("123e1", 1230.0);
+        test("123e-1", 12.3);
+        test("1___2_3_e-1__", 12.3);
+        test("1___2_3_E+1__", 1230.0);
+        test("0.1_m", 0.0001);
+        test("1_2_.3_M", 12300000.0);
+        test("1_M", 1000000.0);
+        test("0T", 0.0);
+        test("1T", 1e12);
+        test("1G", 1e9);
+        test("1M", 1e6);
+        test("1k", 1e3);
+        test("1K", 1e3);
+        test("1m", 1e-3);
+        test("1u", 1e-6);
+        test("1n", 1e-9);
+        test("1p", 1e-12);
+        test("1f", 1e-15);
+        test("1a", 1e-18);
+    };
+}
+
+#[test]
+fn test_parse_real() {
+    fn test(s: &str, val: f64) {
+        let sm = SourceManager::new();
+        let chunk = sm.add_file("test", s);
+        assert_eq!(parse_real(chunk.range(..)), val);
+    }
+    real_tests!();
+}
+
+#[test]
+fn test_parse_shortreal() {
+    fn test(s: &str, val: f32) {
+        let sm = SourceManager::new();
+        let chunk = sm.add_file("test", s);
+        assert_eq!(parse_shortreal(chunk.range(..)), val);
+    }
+    real_tests!();
+}
+
 fn test_parser<F, T>(
     lang: LangMode,
     text: &str,
@@ -46,6 +104,21 @@ fn test_parser<F, T>(
         .map(|diag| (diag.typ, sm.expand_range(diag.spans[0].range).str()))
         .collect();
     assert_eq!(diags, exp_diags);
+}
+
+#[test]
+fn test_validate_real() {
+    fn test(l: LangMode, s: &str, exp_diags: &[(&'static DiagType, &str)]) {
+        test_parser(l, s, validate_real, (), exp_diags);
+    }
+    test(LangMode::Verilog1995, "10e5", &[]);
+    test(LangMode::Verilog1995, "1.5_", &[]);
+    test(LangMode::Verilog1995, "1m", &[(diags::ams_si_suffix, "m")]);
+    test(LangMode::Verilog1995, "1k", &[(diags::ams_si_suffix, "k")]);
+    test(LangMode::VerilogA10, "1k", &[(diags::ams_si_suffix, "k")]);
+    test(LangMode::VerilogA10, "1K", &[]);
+    test(LangMode::VerilogAMS20, "1m", &[]);
+    test(LangMode::VerilogAMS20, "1k", &[]);
 }
 
 #[test]
