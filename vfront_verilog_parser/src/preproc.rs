@@ -145,6 +145,25 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
         self.ifdef_chunk_level = entry.1;
     }
 
+    /// Emits a diagnostic for nested block comments.
+    fn check_block_comment(&mut self, token: Token<'sm>) {
+        let matches = token.src[2..].match_indices("/*");
+        for (pos, _) in matches {
+            self.state
+                .diags
+                .begin(
+                    diags::nested_block_comment,
+                    "`/*` should not be used within block comments",
+                )
+                .primary(
+                    token.src.range(pos + 2..pos + 4),
+                    "extra block comment start",
+                )
+                .secondary(token.src.range(0..2), "outer block comment start")
+                .emit();
+        }
+    }
+
     /// Emits a diagnostic for unclosed block comment.
     fn unclosed_block_comment(&mut self, token: Token<'sm>) {
         self.state
@@ -152,6 +171,7 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
             .begin(diags::err_unclosed_block_comment, "unclosed block comment")
             .primary(token.src, "unclosed comment")
             .emit();
+        self.check_block_comment(token);
     }
 
     /// A simpler version of [`Preproc::peek`] that only skips whitespace and doesn't do any more complex
@@ -161,11 +181,13 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
         loop {
             let token = self.lexer.peek(mode);
             match token.kind {
-                TokenKind::Whitespace
-                | TokenKind::Newline
-                | TokenKind::BlockComment
-                | TokenKind::LineComment => {
+                TokenKind::Whitespace | TokenKind::Newline | TokenKind::LineComment => {
                     // Skip whitespace and comments.
+                    self.lexer.step(token);
+                    continue;
+                }
+                TokenKind::BlockComment => {
+                    self.check_block_comment(token);
                     self.lexer.step(token);
                     continue;
                 }
@@ -378,6 +400,10 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
                     self.unclosed_block_comment(token);
                     self.lexer.step(token);
                 }
+                TokenKind::BlockComment => {
+                    self.check_block_comment(token);
+                    self.lexer.step(token);
+                }
                 TokenKind::Directive => {
                     if let Some(kind) = parse_keyword(&token.src, self.state.lang) {
                         token.kind = kind;
@@ -513,11 +539,12 @@ impl<'sm, 'a> Preproc<'sm, 'a> {
         loop {
             let mut token = self.lexer.peek(mode);
             match token.kind {
-                TokenKind::Whitespace
-                | TokenKind::Newline
-                | TokenKind::BlockComment
-                | TokenKind::LineComment => {
+                TokenKind::Whitespace | TokenKind::Newline | TokenKind::LineComment => {
                     // Skip whitespace and comments.
+                    self.lexer.step(token);
+                }
+                TokenKind::BlockComment => {
+                    self.check_block_comment(token);
                     self.lexer.step(token);
                 }
                 TokenKind::BlockCommentUnclosed => {
