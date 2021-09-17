@@ -1,10 +1,10 @@
 //! Functions for handling Verilog literals.
 
-use vfront_basics::source::SourceRangeRef;
 use crate::diags;
 use crate::lang::LangContext;
 use std::convert::TryFrom;
-use std::ops::{RangeBounds, Bound};
+use std::ops::{Bound, RangeBounds};
+use vfront_basics::source::SourceRangeRef;
 
 /// Parses a string literal into a byte array.  On error, returns None and
 /// emits the appropriate diagnostics.
@@ -144,7 +144,10 @@ pub fn parse_string(ctx: LangContext<'_>, token: SourceRangeRef<'_>) -> Option<B
 
 /// Given a string literal and a range of byte positions in the decoded literal, recover and return
 /// corresponding source range.  The input must be a valid decodable string literal.
-pub fn get_string_literal_range(token: SourceRangeRef<'_>, r: impl RangeBounds<usize>) -> SourceRangeRef<'_> {
+pub fn get_string_literal_range(
+    token: SourceRangeRef<'_>,
+    r: impl RangeBounds<usize>,
+) -> SourceRangeRef<'_> {
     let mut reader = token.reader();
     assert_eq!(reader.eat(), Some('"'));
     let mut pos: usize = 0;
@@ -173,7 +176,7 @@ pub fn get_string_literal_range(token: SourceRangeRef<'_>, r: impl RangeBounds<u
             Some('"') => match start {
                 None => return reader.bookmark().range_len(0),
                 Some(start) => return start.range_to(reader.bookmark()),
-            }
+            },
             Some('\\') => {
                 match reader.eat() {
                     // Skip escaped newlines.
@@ -189,7 +192,7 @@ pub fn get_string_literal_range(token: SourceRangeRef<'_>, r: impl RangeBounds<u
                         reader.eat();
                         reader.eat_if(|c| c.is_digit(16));
                         pos += 1;
-                    },
+                    }
                     Some(c) if c.is_digit(8) => {
                         for _ in 0..2 {
                             if reader.eat_if(|c| c.is_digit(8)).is_none() {

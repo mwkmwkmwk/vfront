@@ -137,7 +137,10 @@ fn test_string_range() {
     fn test(s: &str, byte_range: impl RangeBounds<usize>, source_range: impl RangeBounds<usize>) {
         let sm = SourceManager::new();
         let chunk = sm.add_file("test", s);
-        assert_eq!(get_string_literal_range(chunk.range(..), byte_range), chunk.range(source_range));
+        assert_eq!(
+            get_string_literal_range(chunk.range(..), byte_range),
+            chunk.range(source_range)
+        );
     }
     test("\"abcdef\"", 2..4, 3..5);
     test("\"abc\\x64ef\"", 2..5, 3..9);
