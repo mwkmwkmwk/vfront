@@ -20,4 +20,5 @@ diag_types!(
     error err_expected_macro_name = "A macro name was expected by a directive, but not found.",
     warning undef_undefined = "An `undef directive tried to undefine an undefined macro.",
     warning undef_predefined = "An `undef directive tried to undefine a predefined standard macro.",
+    warning nested_block_comment = "The start of a nested block comment was found and ignored.",
 );
