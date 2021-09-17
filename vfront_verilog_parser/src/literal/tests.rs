@@ -1,11 +1,9 @@
 use super::*;
 use crate::diags;
 use crate::lang::{LangContext, LangMode};
-use crate::lex::Lexer;
-use crate::token::LexMode;
 use std::fmt;
 use vfront_basics::diag::{DiagRegistry, DiagStore, DiagSystem, DiagType};
-use vfront_basics::source::SourceManager;
+use vfront_basics::source::{SourceManager, SourceRangeRef};
 
 #[test]
 fn test_make_string_literal() {
@@ -26,7 +24,7 @@ fn test_parser<F, T>(
     exp: T,
     exp_diags: &[(&'static DiagType, &str)],
 ) where
-    F: FnOnce(LangContext, Token<'_>) -> T,
+    F: FnOnce(LangContext, SourceRangeRef<'_>) -> T,
     T: PartialEq + Eq + fmt::Debug,
 {
     let sm = SourceManager::new();
@@ -40,8 +38,7 @@ fn test_parser<F, T>(
         lang,
     };
     let chunk = sm.add_file("test.v", text);
-    let mut lexer = Lexer::new(chunk);
-    let res = f(ctx, lexer.lex(LexMode::Default));
+    let res = f(ctx, chunk.range(..));
     assert_eq!(res, exp);
     let diags: Vec<_> = sink
         .into_vec()
@@ -133,4 +130,46 @@ def""#,
     test("\"abc\\\rdef\"", Some(b"abcdef"), &[]);
     test("\"abc", None, &[(diags::err_unclosed_string, "\"abc")]);
     test("\"abc\\", None, &[(diags::err_unclosed_string, "\"abc\\")]);
+}
+
+#[test]
+fn test_string_range() {
+    fn test(s: &str, byte_range: impl RangeBounds<usize>, source_range: impl RangeBounds<usize>) {
+        let sm = SourceManager::new();
+        let chunk = sm.add_file("test", s);
+        assert_eq!(get_string_literal_range(chunk.range(..), byte_range), chunk.range(source_range));
+    }
+    test("\"abcdef\"", 2..4, 3..5);
+    test("\"abc\\x64ef\"", 2..5, 3..9);
+    test("\"abc\\x6xef\"", 2..5, 3..8);
+    test("\"abc\\144ef\"", 2..5, 3..9);
+    test("\"abc\\64ef\"", 2..5, 3..8);
+    test("\"abc\\6ef\"", 2..5, 3..7);
+    test("\"abc\\nef\"", 2..5, 3..7);
+    test("\"abc\\tef\"", 2..5, 3..7);
+    test("\"abc\\vef\"", 2..5, 3..7);
+    test("\"abc\\aef\"", 2..5, 3..7);
+    test("\"abc\\\\ef\"", 2..5, 3..7);
+    test("\"abc\\\"ef\"", 2..5, 3..7);
+    test("\"abc\\\nef\"", 2..5, 3..8);
+    test("\"abc\\\ref\"", 2..5, 3..8);
+    test("\"abc\\\r\nef\"", 2..5, 3..9);
+    test("\"abc\u{1234}def\"", 2..4, 3..7);
+    test("\"abc\u{1234}def\"", 3..3, 4..4);
+    test("\"abc\u{1234}def\"", 3..4, 4..7);
+    test("\"abc\u{1234}def\"", 3..5, 4..7);
+    test("\"abc\u{1234}def\"", 3..6, 4..7);
+    test("\"abc\u{1234}def\"", 3..7, 4..8);
+    test("\"abc\u{1234}def\"", 3..8, 4..9);
+    test("\"abc\u{1234}def\"", 3..200, 4..10);
+    test("\"abc\u{1234}def\"", 3.., 4..10);
+    test("\"abc\u{1234}def\"", 4..4, 4..7);
+    test("\"abc\u{1234}def\"", 4..5, 4..7);
+    test("\"abc\u{1234}def\"", 4..6, 4..7);
+    test("\"abc\u{1234}def\"", 4..7, 4..8);
+    test("\"abc\u{1234}def\"", 5..5, 4..7);
+    test("\"abc\u{1234}def\"", 5..6, 4..7);
+    test("\"abc\u{1234}def\"", 5..6, 4..7);
+    test("\"abc\u{1234}def\"", 5..7, 4..8);
+    test("\"abc\u{1234}def\"", 6..7, 7..8);
 }
