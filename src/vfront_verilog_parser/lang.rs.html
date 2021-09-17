@@ -79,6 +79,17 @@
 <span id="79">79</span>
 <span id="80">80</span>
 <span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">vfront_basics::diag::DiagSystem</span>;
 <span class="kw">use</span> <span class="ident">vfront_basics::source::SourceManager</span>;
 
@@ -132,6 +143,17 @@
                 <span class="op">|</span> <span class="ident">LangMode::SystemVerilogAMS</span>
         )
     }
+
+    <span class="doccomment">/// Return true if this is a variant of Verilog-A (ie there is no digital logic support).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_analog_only</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="ident">LangMode::VerilogA10</span>
+    }
+
+    <span class="doccomment">/// Return true if this is a variant of Verilog-A or Verilog-AMS.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_analog</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">is_vams</span>() <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">is_analog_only</span>()
+    }
+
     <span class="doccomment">/// Return true if this is a variant of SystemVerilog.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_sv</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="macro">matches!</span>(

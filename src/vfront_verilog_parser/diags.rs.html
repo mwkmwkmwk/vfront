@@ -22,6 +22,7 @@
 <span id="22">22</span>
 <span id="23">23</span>
 <span id="24">24</span>
+<span id="25">25</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">vfront_basics::diag_types</span>;
 
 <span class="macro">diag_types!</span>(
@@ -32,6 +33,7 @@
     <span class="ident">error</span> <span class="ident">err_octal_escape_overflow</span> <span class="op">=</span> <span class="string">&quot;An octal string escape sequence was found with a value larget than `\\0377`.&quot;</span>,
     <span class="ident">error</span> <span class="ident">err_hex_escape_missing_digits</span> <span class="op">=</span> <span class="string">&quot;A `\\x` string escape sequence was found, but wasn&#39;t followed by hex digits.&quot;</span>,
     <span class="ident">warning</span> <span class="ident">systemverilog_string_escape</span> <span class="op">=</span> <span class="string">&quot;A SystemVerilog-only string escape was found in non-SystemVerilog mode.&quot;</span>,
+    <span class="ident">warning</span> <span class="ident">ams_si_suffix</span> <span class="op">=</span> <span class="string">&quot;A SI suffix was found on a real number in non-Verilog-AMS mode.&quot;</span>,
     <span class="comment">// Preprocessor.</span>
     <span class="ident">error</span> <span class="ident">err_unclosed_block_comment</span> <span class="op">=</span> <span class="string">&quot;A block comment was found without closing `*/`.&quot;</span>,
     <span class="ident">error</span> <span class="ident">err_unclosed_ifdef</span> <span class="op">=</span> <span class="string">&quot;An `ifdef or `ifndef was found without matching `endif.&quot;</span>,
