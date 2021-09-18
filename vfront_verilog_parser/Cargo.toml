@@ -9,3 +9,6 @@ edition = "2018"
 vfront_basics = { path = "../vfront_basics" }
 vfront_tokendata_derive = { path = "../vfront_tokendata_derive" }
 phf = { version = "0.10", features = ["macros"] }
+
+[dev-dependencies]
+tempfile = "3.2.0"
