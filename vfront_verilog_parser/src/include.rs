@@ -5,6 +5,7 @@
 //! a file is to be included.  Two implementations of this trait are defined here.
 
 use std::collections::{hash_map::Entry, HashMap};
+use std::path::Path;
 
 /// Describes how to search for the include file.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -103,3 +104,83 @@ impl Default for VirtualIncludeProvider {
         Self::new()
     }
 }
+
+/// The standard include provider which looks up files in the configured include paths.
+pub struct FilesystemIncludeProvider {
+    system_search_paths: Vec<Box<Path>>,
+    user_search_paths: Vec<Box<Path>>,
+}
+
+impl FilesystemIncludeProvider {
+    /// Creates an empty provider.
+    pub fn new() -> Self {
+        FilesystemIncludeProvider {
+            system_search_paths: Vec::new(),
+            user_search_paths: Vec::new(),
+        }
+    }
+
+    /// Adds a file search path to the provider.
+    pub fn add_search_path(&mut self, mode: IncludeSearchMode, search_path: impl Into<Box<Path>>) {
+        let search_paths = match mode {
+            IncludeSearchMode::System => &mut self.system_search_paths,
+            IncludeSearchMode::User => &mut self.user_search_paths,
+        };
+        search_paths.push(search_path.into());
+    }
+
+    fn lookup_filename(&self, filename: &Path) -> Option<IncludeFile> {
+        // TODO: while this should be fine for IO errors, we should probably tolerate UTF-8
+        // transcoding failures
+        let text = std::fs::read_to_string(&filename).ok()?;
+        Some(IncludeFile {
+            name: filename.to_string_lossy().into(),
+            text: text.into(),
+        })
+    }
+
+    fn lookup_in_search_path(&self, search_path: &Path, filename: &Path) -> Option<IncludeFile> {
+        let filename: Box<Path> = search_path.join(filename).into();
+        self.lookup_filename(&filename)
+    }
+
+    fn lookup_in_search_paths(
+        &self,
+        search_paths: &[Box<Path>],
+        filename: &Path,
+    ) -> Option<IncludeFile> {
+        for search_path in search_paths {
+            let result = self.lookup_in_search_path(search_path, filename);
+            if result.is_some() {
+                return result;
+            }
+        }
+        None
+    }
+}
+
+impl IncludeProvider for FilesystemIncludeProvider {
+    fn get_file(&self, mode: IncludeSearchMode, name: &str) -> Option<IncludeFile> {
+        let filename = Path::new(name);
+        if filename.is_absolute() {
+            if mode == IncludeSearchMode::System {
+                todo!("forbid use of absolute paths in system include directives, per Section 22.4 of IEEE 1800-2017");
+            }
+            return self.lookup_filename(filename);
+        }
+        let search_paths = match mode {
+            IncludeSearchMode::System => &self.system_search_paths,
+            IncludeSearchMode::User => &self.user_search_paths,
+        };
+        self.lookup_in_search_paths(search_paths, filename)
+    }
+}
+
+impl Default for FilesystemIncludeProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests;
