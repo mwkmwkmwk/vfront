@@ -1,0 +1,23 @@
+use vfront_basics::diag_types;
+
+diag_types!(rtlil,
+    error expected_id = "identifier was expected, but a different token was found",
+    error expected_nl = "newline was expected, but a different token was found",
+    error expected_sync_kind = "sync kind was expected, but a different token was found",
+    error expected_sigspec = "sigspec was expected, but a different token was found",
+    error expected_item = "an item was expected, but a different token was found",
+    error int_out_of_range = "integer literal is out of range of signed 32-bit integers",
+    error bitvec_size_out_of_range = "bit vector literal size is too large",
+    error attr_redefined = "more than one attribute with the same name on an item",
+    error item_redefined = "more than one item with the same name defined in a scope",
+    error duplicate_option = "item option specified more than once",
+    error attr_not_allowed = "attributes cannot be attached to this kind of item",
+    error attr_trailing = "trailing attributes that aren't attached to any item",
+    error unterminated_string = "string literal has no closing quote character",
+    error unknown_string_escape = "string literal has an unknown escape character",
+    error wrong_item = "an item was found in the wrong context",
+    error unclosed_concat = "a concatenation sigspec was found without closing brace",
+    error unclosed_slice = "a slice sigspec was found without closing bracket",
+    error unmatched_end = "`end` found on top level",
+    error unclosed_item = "an item is missing an `end`",
+);

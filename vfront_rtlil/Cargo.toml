@@ -1,0 +1,13 @@
+[package]
+name = "vfront_rtlil"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+vfront_basics = { path = "../vfront_basics" }
+vfront_tokendata_derive = { path = "../vfront_tokendata_derive" }
+phf = { version = "0.10", features = ["macros"] }
+assert_matches = "1.5"
+indexmap = "1.7"
