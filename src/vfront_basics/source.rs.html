@@ -1,102 +1,109 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `vfront_basics&#x2F;src&#x2F;source.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>source.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../vfront_basics/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `vfront_basics/src/source.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>source.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../vfront_basics/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../vfront_basics/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../vfront_basics/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -1175,29 +1182,29 @@
     ) {
         <span class="kw">let</span> <span class="ident">enter_idx</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">kind</span> {
             <span class="comment">// IncludeEnter: point to itself.</span>
-            <span class="ident">SourceLineOverrideKind::IncludeEnter</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>()),
+            <span class="ident">SourceLineOverrideKind::IncludeEnter</span> =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>()),
             <span class="comment">// Plain: copy from last entry.</span>
-            <span class="ident">SourceLineOverrideKind::Plain</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="ident">SourceLineOverrideKind::Plain</span> =&gt; {
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
                     <span class="prelude-val">None</span>
                 } <span class="kw">else</span> {
                     <span class="self">self</span>.<span class="ident">line_overrides</span>[<span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">enter_idx</span>
                 }
             }
             <span class="comment">// IncludeExit: copy from entry previous to last entry&#39;s enter_idx.</span>
-            <span class="ident">SourceLineOverrideKind::IncludeExit</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="ident">SourceLineOverrideKind::IncludeExit</span> =&gt; {
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
                     <span class="comment">// This implies stack underflow, but then noone said that</span>
                     <span class="comment">// `line directives have to actually be valid.  Ignore it.</span>
                     <span class="prelude-val">None</span>
                 } <span class="kw">else</span> {
                     <span class="kw">match</span> <span class="self">self</span>.<span class="ident">line_overrides</span>[<span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">enter_idx</span> {
                         <span class="comment">// This also means stack underflow.</span>
-                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                        <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
                         <span class="comment">// The IncludeEnter referenced is the first override in the file.</span>
-                        <span class="prelude-val">Some</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                        <span class="prelude-val">Some</span>(<span class="number">0</span>) =&gt; <span class="prelude-val">None</span>,
                         <span class="comment">// Copy from whatever was before the IncludeEnter.</span>
-                        <span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">line_overrides</span>[<span class="ident">idx</span> <span class="op">-</span> <span class="number">1</span>].<span class="ident">enter_idx</span>,
+                        <span class="prelude-val">Some</span>(<span class="ident">idx</span>) =&gt; <span class="self">self</span>.<span class="ident">line_overrides</span>[<span class="ident">idx</span> <span class="op">-</span> <span class="number">1</span>].<span class="ident">enter_idx</span>,
                     }
                 }
             }
@@ -1211,7 +1218,7 @@
     }
 
     <span class="doccomment">/// Returns the raw line table, materializing it first if necessary.</span>
-    <span class="kw">fn</span> <span class="ident">get_raw_line_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">usize</span>] {
+    <span class="kw">fn</span> <span class="ident">get_raw_line_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">usize</span>] {
         <span class="self">self</span>.<span class="ident">raw_line_table</span>.<span class="ident">get_or_init</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>];
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="number">0</span>;
@@ -1230,7 +1237,7 @@
 
     <span class="doccomment">/// Returns index of the most recent line number override entry applying</span>
     <span class="doccomment">/// to a given position, if any.</span>
-    <span class="kw">fn</span> <span class="ident">find_line_override</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_line_override</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">line_overrides</span>.<span class="ident">len</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">left</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">right</span> <span class="op">=</span> <span class="ident">size</span>;
@@ -1243,7 +1250,7 @@
             }
             <span class="ident">size</span> <span class="op">=</span> <span class="ident">right</span> <span class="op">-</span> <span class="ident">left</span>;
         }
-        <span class="kw">if</span> <span class="ident">left</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">left</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
             <span class="prelude-val">Some</span>(<span class="ident">left</span> <span class="op">-</span> <span class="number">1</span>)
@@ -1251,7 +1258,7 @@
     }
 
     <span class="doccomment">/// Decodes the raw position into line number and related information.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLineInfo</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">SourceLineInfo</span> {
         <span class="macro">assert!</span>(<span class="ident">pos</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>());
         <span class="kw">let</span> <span class="ident">raw_line_table</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_raw_line_table</span>();
         <span class="kw">let</span> <span class="ident">find_line_num</span> <span class="op">=</span> <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">raw_line_table</span>.<span class="ident">partition_point</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">p</span>);
@@ -1274,8 +1281,8 @@
                     <span class="ident">line_num</span>: <span class="ident">ov</span>.<span class="ident">line_num</span> <span class="op">+</span> (<span class="ident">ov_ref_line_num</span> <span class="op">-</span> <span class="ident">ov_raw_line_num</span>),
                 });
                 <span class="kw">match</span> <span class="ident">ov</span>.<span class="ident">enter_idx</span> {
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
-                    <span class="prelude-val">Some</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> =&gt; <span class="kw">break</span>,
+                    <span class="prelude-val">Some</span>(<span class="number">0</span>) =&gt; {
                         <span class="comment">// Edge case: if the first `line in a file is</span>
                         <span class="comment">// an IncludeEnter, look up the virtual include</span>
                         <span class="comment">// location by the *real* file instead.</span>
@@ -1292,7 +1299,7 @@
                         }
                         <span class="kw">break</span>;
                     }
-                    <span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">idx</span>) =&gt; {
                         <span class="comment">// If this virtual file was virtually included from</span>
                         <span class="comment">// somewhere, add the virtual include location onto</span>
                         <span class="comment">// the stack, and look it up as above using the</span>
@@ -1315,38 +1322,38 @@
 
     <span class="doccomment">/// Returns the length of the underlying source text in bytes.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::len_without_is_empty</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>()
     }
 
     <span class="doccomment">/// Returns a reference to the given position (in bytes).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">loc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">loc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="ident">SourceRef</span> { <span class="ident">chunk</span>: <span class="self">self</span>, <span class="ident">pos</span> }
     }
 
     <span class="doccomment">/// Returns a reference to the start of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">loc</span>(<span class="number">0</span>)
     }
 
     <span class="doccomment">/// Returns a reference to the end of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">len</span>())
     }
 
     <span class="doccomment">/// Returns a reference to a subrange of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">SourceRangeRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>,
             <span class="ident">pos_start</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">start_bound</span>() {
-                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
-                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+                <span class="ident">Bound::Unbounded</span> =&gt; <span class="number">0</span>,
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="ident">p</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
             },
             <span class="ident">pos_end</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">end_bound</span>() {
-                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>(),
-                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
-                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+                <span class="ident">Bound::Unbounded</span> =&gt; <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">len</span>(),
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="ident">p</span>,
             },
         };
         <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">pos_start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">res</span>.<span class="ident">pos_end</span>);
@@ -1356,7 +1363,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">SourceChunk</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">std::ptr::eq</span>(<span class="self">self</span>, <span class="ident">other</span>)
     }
 }
@@ -1364,18 +1371,18 @@
 <span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">SourceChunk</span> {}
 
 <span class="kw">impl</span> <span class="ident">Hash</span> <span class="kw">for</span> <span class="ident">SourceChunk</span> {
-    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">H</span>) {
+    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">H</span>) {
         <span class="self">self</span>.<span class="ident">start_vpos</span>.<span class="ident">hash</span>(<span class="ident">state</span>);
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">SourceChunk</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;SourceChunk&quot;</span>);
         <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;start_vpos&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">start_vpos</span>);
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">info</span> {
-            <span class="ident">SourceChunkInfo::File</span> { <span class="kw-2">ref</span> <span class="ident">file_name</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;file_name&quot;</span>, <span class="ident">file_name</span>),
-            <span class="ident">SourceChunkInfo::MacroExpansion</span> { <span class="kw-2">ref</span> <span class="ident">name</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;macro_name&quot;</span>, <span class="ident">name</span>),
+            <span class="ident">SourceChunkInfo::File</span> { <span class="kw-2">ref</span> <span class="ident">file_name</span>, .. } =&gt; <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;file_name&quot;</span>, <span class="ident">file_name</span>),
+            <span class="ident">SourceChunkInfo::MacroExpansion</span> { <span class="kw-2">ref</span> <span class="ident">name</span>, .. } =&gt; <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;macro_name&quot;</span>, <span class="ident">name</span>),
         };
         <span class="ident">d</span>.<span class="ident">finish</span>()
     }
@@ -1383,7 +1390,7 @@
 
 <span class="kw">impl</span> <span class="ident">SourceManager</span> {
     <span class="doccomment">/// Expand a [`SourceLoc`] into a [`SourceRef`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_loc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_loc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) -&gt; <span class="ident">SourceRef</span> {
         <span class="comment">// If we have a valid loc in hand, a chunk must already exist.</span>
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">chunks</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chunks</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>;
@@ -1405,7 +1412,7 @@
         <span class="ident">SourceRef</span> { <span class="ident">chunk</span>, <span class="ident">pos</span> }
     }
     <span class="doccomment">/// Expand a [`SourceRange`] into a [`SourceRangeRef`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">SourceRange</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">SourceRange</span>) -&gt; <span class="ident">SourceRangeRef</span> {
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">range</span>.<span class="ident">start</span>);
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">end</span>.<span class="ident">vpos</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">start</span>.<span class="ident">chunk</span>.<span class="ident">start_vpos</span>);
         <span class="kw">let</span> <span class="ident">pos_end</span> <span class="op">=</span> (<span class="ident">range</span>.<span class="ident">end</span>.<span class="ident">vpos</span>.<span class="ident">get</span>() <span class="op">-</span> <span class="ident">start</span>.<span class="ident">chunk</span>.<span class="ident">start_vpos</span>.<span class="ident">get</span>()) <span class="kw">as</span> <span class="ident">usize</span>;
@@ -1422,9 +1429,9 @@
         <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">depth</span>: <span class="ident">u32</span>,
         <span class="ident">info</span>: <span class="ident">SourceChunkInfo</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
+    ) -&gt; <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
         <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">text</span>.<span class="ident">into</span>();
-        <span class="kw">let</span> <span class="ident">start_vpos</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">chunks</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">let</span> <span class="ident">start_vpos</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">chunks</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
             <span class="ident">NonZeroU32::new</span>(<span class="number">1</span>).<span class="ident">unwrap</span>()
         } <span class="kw">else</span> {
             <span class="comment">// Find the end vpos of the last chunk.</span>
@@ -1453,7 +1460,7 @@
     }
 
     <span class="doccomment">/// Add a new chunk representing a top-level file, return it.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
         <span class="self">self</span>.<span class="ident">add_chunk</span>(
             <span class="ident">text</span>,
             <span class="number">0</span>,
@@ -1470,7 +1477,7 @@
         <span class="ident">name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">loc_included</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">SourceRange</span><span class="op">&gt;</span>,
         <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
+    ) -&gt; <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
         <span class="kw">let</span> <span class="ident">loc_included</span> <span class="op">=</span> <span class="ident">loc_included</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">loc_start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">loc_included</span>.<span class="ident">start</span>);
         <span class="self">self</span>.<span class="ident">add_chunk</span>(
@@ -1490,7 +1497,7 @@
         <span class="ident">loc_defined</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SourceRange</span><span class="op">&gt;</span>,
         <span class="ident">loc_invoked</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">SourceRange</span><span class="op">&gt;</span>,
         <span class="ident">text</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
+    ) -&gt; <span class="kw-2">&amp;</span><span class="ident">SourceChunk</span> {
         <span class="kw">let</span> <span class="ident">loc_invoked</span> <span class="op">=</span> <span class="ident">loc_invoked</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">loc_start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">loc_invoked</span>.<span class="ident">start</span>);
         <span class="self">self</span>.<span class="ident">add_chunk</span>(
@@ -1505,23 +1512,23 @@
     }
 
     <span class="doccomment">/// Creates a new [`SourceManager`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">SourceManager</span> {
             <span class="ident">chunks</span>: <span class="ident">FrozenVec::new</span>(),
         }
     }
 
     <span class="doccomment">/// Decodes a [`SourceLoc`] directly to [`SourceLineInfo`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLineInfo</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) -&gt; <span class="ident">SourceLineInfo</span> {
         <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">loc</span>).<span class="ident">get_line_info</span>()
     }
 
     <span class="doccomment">/// Decodes a [`SourceLoc`] into [`SourceSimpleLineInfo`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_simple_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceSimpleLineInfo</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_simple_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">loc</span>: <span class="ident">SourceLoc</span>) -&gt; <span class="ident">SourceSimpleLineInfo</span> {
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">sr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">expand_loc</span>(<span class="ident">loc</span>);
             <span class="kw">match</span> <span class="ident">sr</span>.<span class="ident">chunk</span>.<span class="ident">info</span> {
-                <span class="ident">SourceChunkInfo::File</span> { <span class="kw-2">ref</span> <span class="ident">file_name</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">SourceChunkInfo::File</span> { <span class="kw-2">ref</span> <span class="ident">file_name</span>, .. } =&gt; {
                     <span class="kw">let</span> <span class="ident">li</span> <span class="op">=</span> <span class="ident">sr</span>.<span class="ident">get_line_info</span>();
                     <span class="kw">if</span> <span class="ident">li</span>.<span class="ident">overrides</span>.<span class="ident">is_empty</span>() {
                         <span class="kw">return</span> <span class="ident">SourceSimpleLineInfo</span> {
@@ -1537,7 +1544,7 @@
                         };
                     }
                 }
-                <span class="ident">SourceChunkInfo::MacroExpansion</span> { <span class="ident">loc_invoked</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">SourceChunkInfo::MacroExpansion</span> { <span class="ident">loc_invoked</span>, .. } =&gt; {
                     <span class="comment">// Retry with invocation loc.</span>
                     <span class="ident">loc</span> <span class="op">=</span> <span class="ident">loc_invoked</span>.<span class="ident">start</span>;
                 }
@@ -1547,14 +1554,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">SourceManager</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">SourceManager::new</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">SourceLoc</span> {
     <span class="doccomment">/// Returns a [`SourceRange`] starting at this location and ending at the other location.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRange</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SourceLoc</span>) -&gt; <span class="ident">SourceRange</span> {
         <span class="ident">SourceRange</span> {
             <span class="ident">start</span>: <span class="kw-2">*</span><span class="self">self</span>,
             <span class="ident">end</span>: <span class="ident">other</span>,
@@ -1563,13 +1570,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SourceLoc</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">src</span>: <span class="ident">SourceRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">src</span>: <span class="ident">SourceRef</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">src</span>.<span class="ident">compress</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SourceRange</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">src</span>: <span class="ident">SourceRangeRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">src</span>: <span class="ident">SourceRangeRef</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">src</span>.<span class="ident">compress</span>()
     }
 }
@@ -1577,12 +1584,12 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns the suffix of the referenced chunk&#39;s text starting from this</span>
     <span class="doccomment">/// position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suffix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suffix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">text</span>[<span class="self">self</span>.<span class="ident">pos</span>..]
     }
 
     <span class="doccomment">/// Returns a range of given length starting from this position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">len</span>());
         <span class="ident">SourceRangeRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
@@ -1592,7 +1599,7 @@
     }
 
     <span class="doccomment">/// Returns a range starting at this location and ending at the other location.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="macro">assert_eq!</span>(<span class="self">self</span>.<span class="ident">chunk</span>, <span class="ident">other</span>.<span class="ident">chunk</span>);
         <span class="ident">SourceRangeRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
@@ -1613,19 +1620,19 @@
     }
 
     <span class="doccomment">/// Decodes the raw position into line number and related information.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLineInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceLineInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">get_line_info</span>(<span class="self">self</span>.<span class="ident">pos</span>)
     }
 
     <span class="doccomment">/// Converts into a [`SourceLoc`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceLoc</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceLoc</span> {
         <span class="ident">SourceLoc</span> {
             <span class="ident">vpos</span>: <span class="ident">NonZeroU32::new</span>(<span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">start_vpos</span>.<span class="ident">get</span>() <span class="op">+</span> (<span class="self">self</span>.<span class="ident">pos</span> <span class="kw">as</span> <span class="ident">u32</span>)).<span class="ident">unwrap</span>(),
         }
     }
 
     <span class="doccomment">/// Returns a [`SourceReader`] covering the range from this position to the end of the chunk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reader</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reader</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">SourceReader</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos_cursor</span>: <span class="self">self</span>.<span class="ident">pos</span>,
@@ -1637,7 +1644,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">delta</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">len</span>());
         <span class="ident">SourceRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
@@ -1647,7 +1654,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">usize</span>) {
+    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">usize</span>) {
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">delta</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">len</span>());
         <span class="self">self</span>.<span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="ident">delta</span>;
     }
@@ -1655,7 +1662,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return a [`SourceRef`] corresponding to start of this range.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">SourceRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos</span>: <span class="self">self</span>.<span class="ident">pos_start</span>,
@@ -1663,7 +1670,7 @@
     }
 
     <span class="doccomment">/// Return a [`SourceRef`] corresponding to end of this range.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">SourceRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos</span>: <span class="self">self</span>.<span class="ident">pos_end</span>,
@@ -1671,18 +1678,18 @@
     }
 
     <span class="doccomment">/// Returns a subrange of this range.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">r</span>: <span class="kw">impl</span> <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">SourceRangeRef</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos_start</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">start_bound</span>() {
-                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span>,
-                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span>,
-                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+                <span class="ident">Bound::Unbounded</span> =&gt; <span class="self">self</span>.<span class="ident">pos_start</span>,
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
             },
             <span class="ident">pos_end</span>: <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">end_bound</span>() {
-                <span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_end</span>,
-                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
-                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span>,
+                <span class="ident">Bound::Unbounded</span> =&gt; <span class="self">self</span>.<span class="ident">pos_end</span>,
+                <span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>,
+                <span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>) =&gt; <span class="self">self</span>.<span class="ident">pos_start</span> <span class="op">+</span> <span class="ident">p</span>,
             },
         };
         <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">pos_start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">res</span>.<span class="ident">pos_end</span>);
@@ -1691,7 +1698,7 @@
     }
 
     <span class="doccomment">/// Converts into a [`SourceRange`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRange</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRange</span> {
         <span class="ident">SourceRange</span> {
             <span class="ident">start</span>: <span class="self">self</span>.<span class="ident">start</span>().<span class="ident">into</span>(),
             <span class="ident">end</span>: <span class="self">self</span>.<span class="ident">end</span>().<span class="ident">into</span>(),
@@ -1699,12 +1706,12 @@
     }
 
     <span class="doccomment">/// Returns the underlying string slice.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">text</span>[<span class="self">self</span>.<span class="ident">pos_start</span>..<span class="self">self</span>.<span class="ident">pos_end</span>]
     }
 
     <span class="doccomment">/// Returns a [`SourceReader`] covering this range.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reader</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reader</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">SourceReader</span> {
             <span class="ident">chunk</span>: <span class="self">self</span>.<span class="ident">chunk</span>,
             <span class="ident">pos_cursor</span>: <span class="self">self</span>.<span class="ident">pos_start</span>,
@@ -1717,71 +1724,71 @@
 <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">str</span>;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="self">self</span>.<span class="ident">str</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">SourceLineInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">get_column_num</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">get_column_num</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">line_offset</span> <span class="op">+</span> <span class="number">1</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SourceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns the chunk slice between the cursor and the end.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suffix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suffix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">text</span>[<span class="self">self</span>.<span class="ident">pos_cursor</span>..<span class="self">self</span>.<span class="ident">pos_end</span>]
     }
 
     <span class="doccomment">/// Moves the cursor to the given position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">move_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">move_to</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) {
         <span class="macro">assert_eq!</span>(<span class="self">self</span>.<span class="ident">chunk</span>, <span class="ident">loc</span>.<span class="ident">chunk</span>);
         <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">=</span> <span class="ident">loc</span>.<span class="ident">pos</span>;
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">pos_end</span>);
     }
 
     <span class="doccomment">/// Returns the current cursor position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cursor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cursor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">pos_cursor</span>)
     }
 
     <span class="doccomment">/// Returns the end position of this reader.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">pos_end</span>)
     }
 
     <span class="doccomment">/// Returns the current bookmark position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bookmark</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bookmark</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">pos_bookmark</span>)
     }
 
     <span class="doccomment">/// Moves the bookmark position to the current cursor position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_mark</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_mark</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">pos_bookmark</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pos_cursor</span>;
     }
 
     <span class="doccomment">/// Moves the cursor position forwards by the given number of bytes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">advance</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">num</span>: <span class="ident">usize</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">advance</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">num</span>: <span class="ident">usize</span>) {
         <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">+</span><span class="op">=</span> <span class="ident">num</span>;
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">pos_end</span>);
     }
 
     <span class="doccomment">/// Moves the cursor position back to the current bookmark position (effectively undoing</span>
     <span class="doccomment">/// all eat calls since the last [`SourceReader::set_mark`] call.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rollback</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rollback</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pos_bookmark</span>;
     }
 
     <span class="doccomment">/// Returns a [`SourceRangeRef`] starting from the current bookmark position and ending</span>
     <span class="doccomment">/// at the current cursor position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">range</span>(<span class="self">self</span>.<span class="ident">pos_bookmark</span>..<span class="self">self</span>.<span class="ident">pos_cursor</span>)
     }
 
     <span class="doccomment">/// Returns a [`SourceRangeRef`] spanning from the given position to the current cursor</span>
     <span class="doccomment">/// position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">start</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">range_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">start</span>: <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="ident">SourceRangeRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="macro">assert_eq!</span>(<span class="self">self</span>.<span class="ident">chunk</span>, <span class="ident">start</span>.<span class="ident">chunk</span>);
         <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">range</span>(<span class="ident">start</span>.<span class="ident">pos</span>..<span class="self">self</span>.<span class="ident">pos_cursor</span>)
     }
@@ -1789,60 +1796,60 @@
     <span class="doccomment">/// Returns the character at the cursor, or None if the cursor is at the end position.</span>
     <span class="doccomment">/// Also returns a [`SourceRef`] that can be passed to [`SourceReader::move_to`] to consume</span>
     <span class="doccomment">/// the returned character.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>, <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>, <span class="ident">SourceRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">suffix</span>().<span class="ident">chars</span>().<span class="ident">next</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">Some</span>(<span class="ident">c</span>), <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">+</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>())),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="self">self</span>.<span class="ident">cursor</span>()),
+            <span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; (<span class="prelude-val">Some</span>(<span class="ident">c</span>), <span class="self">self</span>.<span class="ident">chunk</span>.<span class="ident">loc</span>(<span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">+</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>())),
+            <span class="prelude-val">None</span> =&gt; (<span class="prelude-val">None</span>, <span class="self">self</span>.<span class="ident">cursor</span>()),
         }
     }
 
     <span class="doccomment">/// Returns the character at the cursor and consumes it, or returns None if the cursor</span>
     <span class="doccomment">/// is at the end position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">eat_if</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">true</span>)
     }
 
     <span class="doccomment">/// Checks if the character at the cursor satisfies the given predicate and, if so, consumes</span>
     <span class="doccomment">/// and returns it.  If the cursor is at the end position or the character doesn&#39;t satisfy</span>
     <span class="doccomment">/// the predicate, returns None and doesn&#39;t consume anything.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat_if</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pred</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat_if</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">pred</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">P</span>: <span class="ident">FnOnce</span>(<span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>,
+        <span class="ident">P</span>: <span class="ident">FnOnce</span>(<span class="ident">char</span>) -&gt; <span class="ident">bool</span>,
     {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">suffix</span>().<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">pred</span>(<span class="kw-2">*</span><span class="ident">c</span>)) {
-            <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">+</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>();
                 <span class="prelude-val">Some</span>(<span class="ident">c</span>)
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// Takes the character at the cursor, runs a given function returning an [`Option`] on it,</span>
     <span class="doccomment">/// returns its result.  If the function returns a value other than [`None`], consumes</span>
     <span class="doccomment">/// the character.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat_if_map</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat_if_map</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">char</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">suffix</span>().<span class="ident">chars</span>().<span class="ident">next</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">f</span>(<span class="ident">c</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; <span class="kw">match</span> <span class="ident">f</span>(<span class="ident">c</span>) {
+                <span class="prelude-val">Some</span>(<span class="ident">res</span>) =&gt; {
                     <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">+</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>();
                     <span class="prelude-val">Some</span>(<span class="ident">res</span>)
                 }
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
             },
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// Consumes the characters at the cursor, stopping at the end position or when a character</span>
     <span class="doccomment">/// is found that doesn&#39;t satisfy the given predicate.  Returns a string slice of all</span>
     <span class="doccomment">/// consumed characters.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat_while</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pred</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eat_while</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pred</span>: <span class="ident">P</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>
     <span class="kw">where</span>
-        <span class="ident">P</span>: <span class="ident">FnMut</span>(<span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>,
+        <span class="ident">P</span>: <span class="ident">FnMut</span>(<span class="ident">char</span>) -&gt; <span class="ident">bool</span>,
     {
         <span class="kw">let</span> <span class="ident">suffix</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">suffix</span>();
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">suffix</span>.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="op">!</span><span class="ident">pred</span>(<span class="ident">x</span>)).<span class="ident">unwrap_or</span>(<span class="ident">suffix</span>.<span class="ident">len</span>());
@@ -1853,7 +1860,7 @@
 
     <span class="doccomment">/// If there is an occurence of the given string directly at the cursor, consumes it and</span>
     <span class="doccomment">/// returns true.  Otherwise, does nothing and returns false.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_eat</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_eat</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">suffix</span>().<span class="ident">starts_with</span>(<span class="ident">s</span>) {
             <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">+</span><span class="op">=</span> <span class="ident">s</span>.<span class="ident">len</span>();
             <span class="bool-val">true</span>
@@ -1863,14 +1870,13 @@
     }
 
     <span class="doccomment">/// Returns true iff the cursor position is at the end position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">pos_end</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">pos_cursor</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">pos_end</span>
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span>;
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="vfront_basics" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="vfront_basics" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ee160f2f5 2022-05-23)" ></div>
 </body></html>
