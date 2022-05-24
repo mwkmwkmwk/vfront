@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ConstKind",""],["ItemIdxKind",""],["ItemKind",""],["ParamKind",""],["PortDir",""],["SigSpecKind",""],["State",""],["SyncKind",""]],"struct":[["Attribute",""],["Const",""],["Design",""],["IdString",""],["Item",""],["SigSpec",""]],"type":[["IdStringLoc",""]]});

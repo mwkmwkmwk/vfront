@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["vfront_basics","vfront_tokendata_derive","vfront_verilog_parser"];
+window.ALL_CRATES = ["vfront_basics","vfront_rtlil","vfront_tokendata_derive","vfront_verilog_parser"];
