@@ -50,6 +50,10 @@ use indexmap::{map::Entry, IndexMap};
 
 use crate::source::SourceRange;
 
+pub mod print;
+
+pub use print::DiagPrinter;
+
 /// Determines the handling of a given diagnostic.  Normally selected by the [`DiagType`], but can
 /// be overriden by the user on per-type basis.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
